@@ -38,15 +38,15 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 # Product Backlog📋 <a id="backlog"></a>
 | Rank  | Prioridade |                                                        User Story                                                            | Estimativa de esforço | Sprint
 |:-----:|:----------:|:----------------------------------------------------------------------------------------------------------------------------:|:----------:|:-----------:
-|1|Alta|Como cliente, quero preencher meus dados pessoais, para iniciar minha solicitação de cartão.|3|Sprint 1|
+|**1**|**Alta**|**Como cliente, quero preencher meus dados pessoais, para iniciar minha solicitação de cartão.**|**3**|**Sprint 1**|
 |2|Alta|Como cliente, quero escolher entre Cartão DM e Cartão Loja (física ou digital), para solicitar o produto que desejo.|1|Sprint 1|
-|3|Alta|Como sistema, quero verificar se o cliente é um colaborador DM, para aplicar a aprovação automática do Cartão DM |5|Sprint 1|
-|4|Alta|Como sistema, quero reprovar automaticamente pedidos de Cartão Loja feitos por colaboradores, para seguir a regra de negócio.|3|Sprint 1|
-|5|Média|Como cliente não colaborador, quero que minha solicitação seja marcada como "em análise" quando não for aprovada de imediato, para saber o status do meu pedido.|5| Sprint 2 |
-|6|Média|Como cliente, quero informar meu CEP ao pedir Cartão Loja física, para que o sistema me mostre só lojas do meu estado.|5|Sprint 2|
-|7|Média|Como cliente, quero ser avisado que o Cartão Loja Digital não emite via física, para decidir com clareza antes de solicitar.|2|Sprint 2|
-|8|Média|Como cliente, quero solicitar Cartão Loja Digital de qualquer estado, para não ser bloqueado pela restrição geográfica.|2|Sprint 2|
-|9|Baixa|Como administrador DM, quero cadastrar um novo lojista parceiro, para que clientes já consigam fazer PAC para ele.|5|Sprint 3|
+|3|Média|Como cliente não colaborador, quero que minha solicitação seja marcada como "em análise" quando não for aprovada de imediato, para saber o status do meu pedido.|5| Sprint 1 |
+|4|Média|Como cliente, quero informar meu CEP ao pedir Cartão Loja física, para que o sistema me mostre só lojas do meu estado.|5|Sprint 1|
+|**5**|**Alta**|**Como cliente, quero solicitar Cartão Loja Digital de qualquer estado, para não ser bloqueado pela restrição geográfica.**|**2**|**Sprint 2**|
+|6|Alta|Como cliente, quero ser avisado que o Cartão Loja Digital não emite via física, para decidir com clareza antes de solicitar.|2|Sprint 2|
+|7|Média|Como sistema, quero verificar se o cliente é um colaborador DM, para aplicar a aprovação automática do Cartão DM |5|Sprint 2|
+|8|Média|Como sistema, quero reprovar automaticamente pedidos de Cartão Loja feitos por colaboradores, para seguir a regra de negócio.|3|Sprint 2|
+|**9**|**Média**|**Como administrador DM, quero cadastrar um novo lojista parceiro, para que clientes já consigam fazer PAC para ele.**|**5**|**Sprint 3**|
 |10|Baixa|Como cliente reprovado, quero receber uma oferta de outro produto (EP, DMCred), para ter uma alternativa mesmo sem aprovação do cartão.|5|Sprint 3|
 |11|Baixa|Como parceiro, quero um campo para cadastrar nossos contribuidores, para atribuição das PACs a eles|5|Sprint 3|
 
