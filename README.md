@@ -72,9 +72,9 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 
 | Sprint          |    Período    | Documentação                                     |
 | :---------------: | :-----------: | :------------------------------------------------: |
-|  **SPRINT 1** | 07/09 - 27/09 | [Sprint 1 Docs]() |
-|  **SPRINT 2** | 05/10 - 25/10 | [Sprint 2 Docs]() |
-|  **SPRINT 3** | 02/11 - 22/11 | [Sprint 3 Docs]() |
+|  **SPRINT 1** | 07/09 - 27/09 | [Sprint 1 Docs](docs/sprints/sprint-1) |
+|  **SPRINT 2** | 05/10 - 25/10 | [Sprint 2 Docs](docs/sprints/sprint-2) |
+|  **SPRINT 3** | 02/11 - 22/11 | [Sprint 3 Docs](docs/sprints/sprint-3) |
 
 
 <div align = "center">
