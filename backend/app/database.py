@@ -9,7 +9,7 @@ DATABASE_URL = os.getenv(
 
 engine = create_engine(
     DATABASE_URL,
-    pool_PRE_PING=True
+    pool_pre_ping=True
 )
 
 SessionLocal = sessionmaker(
