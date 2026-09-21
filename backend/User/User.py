@@ -6,6 +6,7 @@ import uuid
 class User:
     name: str
     email: str
+    cpf: str
     id: Optional[str] = None
     is_active: bool = True
 
