@@ -1,80 +1,49 @@
 services:
-
   mysql:
     image: mysql:8.4
     container_name: dmcard_mysql
     restart: unless-stopped
-
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dmcard}
+      MYSQL_USER: ${MYSQL_USER:-dmcard_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dmcard123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
     ports:
       - "3306:3306"
-
     volumes:
       - mysql_data:/var/lib/mysql
-
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p${MYSQL_ROOT_PASSWORD}"
-        ]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-
   backend:
     build:
       context: ./backend
-
     container_name: dmcard_backend
     restart: unless-stopped
-
     environment:
-      DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
-
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-dmcard_user}:${MYSQL_PASSWORD:-dmcard123}@mysql:3306/${MYSQL_DATABASE:-dmcard}
     ports:
       - "8000:8000"
-
     volumes:
       - ./backend:/app
-
     depends_on:
       mysql:
         condition: service_healthy
 
-
   frontend:
     build:
       context: ./frontend
-
     container_name: dmcard_frontend
     restart: unless-stopped
-
-    environment:
-      VITE_API_URL: http://localhost:8000
-
     ports:
-      - "5173:5173"
-
+      - "5173:80"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-
+      - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - backend
-
 
 volumes:
   mysql_data:
