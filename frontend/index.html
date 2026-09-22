@@ -11,9 +11,12 @@
   <link rel="stylesheet" href="css/prova-social.css">
   <link rel="stylesheet" href="css/formulario.css">
   <link rel="stylesheet" href="css/footer.css">
+  <link rel="stylesheet" href="css/faq.css">
 </head>
 <body>
 
+  <!-- ===================== HEADER ===================== -->
+  <!-- Responsável pela task: Estruturar o Header da Landing Page -->
   <header id="header" class="header">
     <div class="header__logo">DM</div>
     <button class="header__cta" id="btn-solicitar-cartao">Solicitar cartão</button>
@@ -21,49 +24,94 @@
 
   <main>
 
+    <!-- ===================== HERO ===================== -->
+    <!-- Responsável pela task: Fazer a Seção Hero -->
     <section id="hero" class="hero">
-
+      <!-- título, texto de apoio e CTA "Quero meu cartão" -->
     </section>
 
+    <!-- ===================== BENEFÍCIOS ===================== -->
+    <!-- Responsável pela task: Estruturar os Cards de Benefícios -->
     <section id="beneficios" class="beneficios">
-
+      <!-- 4 cards: Aprovação rápida, Sem anuidade, Parceiros, Crédito para todos -->
     </section>
 
-
+    <!-- ===================== PROVA SOCIAL ===================== -->
+    <!-- Responsável pela task: Fazer a Seção de Prova Social -->
     <section id="prova-social" class="prova-social">
-
+      <!-- "+50 mil clientes já têm o cartão DM" -->
     </section>
 
-
+    <!-- ===================== FORMULÁRIO (PASSOS 1, 2 e 3) ===================== -->
     <section id="formulario" class="formulario">
 
+      <!-- Componente reutilizável do "Passo X de 3" -->
+      <!-- Responsável pela task: Criar o Stepper de Progresso -->
       <div id="stepper" class="stepper"></div>
 
-
+      <!-- Responsável pela task: Estruturar o Passo 1 (Escolha do Cartão) -->
       <div id="passo-1" class="passo" data-passo="1">
-
+        <!-- opções: Cartão DM / Cartão Loja Físico / Cartão Loja Digital -->
       </div>
 
-
+      <!-- Responsável pela task: Fazer o Formulário do Passo 2 (Dados Pessoais) -->
       <div id="passo-2" class="passo" data-passo="2" hidden>
-
+        <!-- campos: nome, cpf, email, cep, checkbox colaborador -->
       </div>
 
-
+      <!-- Responsável pela task: Estruturar o Passo 3 (Resultado da Pré-Qualificação) -->
       <div id="passo-3" class="passo" data-passo="3" hidden>
-
+        <!-- status: aprovado / em análise / reprovado -->
       </div>
 
+    </section>
+
+    <section id="faq" class="faq-secao">
+      <div class="container">
+        <h2 class="faq-titulo">Dúvidas Frequentes</h2>
+
+        <details class="faq-item">
+          <summary class="faq-pergunta">Como funciona a aprovação?</summary>
+          <p class="faq-resposta">A nossa análise de crédito é feita em segundos pelo sistema, utilizando seus dados cadastrais.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-pergunta">Quais são as taxas do cartão?</summary>
+          <p class="faq-resposta">Não cobramos anuidade. Consulte os termos para taxas de atraso.</p>
+        </details>
+      </div>
     </section>
 
   </main>
 
-
+  <!-- ===================== FOOTER ===================== -->
+  <!-- Responsável pela task: Fazer o Footer da Landing Page -->
   <footer id="footer" class="footer">
+    <div class="container">
 
+    <!-- logo, tagline, produtos, contato, política de privacidade -->
+  <div class="footer-marca">
+        <h2 class="footer-logo">DM</h2>
+        <p class="footer-tagline">O cartão feito para o seu dia a dia.</p>
+      </div>
+
+      <!-- Produtos e Contato -->
+      <div class="footer-links">
+        <a href="#hero">Produtos</a>
+        <a href="#faq">Dúvidas Frequentes</a>
+        <a href="mailto:contato@dm.com.br">Contato</a>
+        <a href="#">Política de Privacidade</a>
+      </div>
+
+      <!-- Direitos -->
+      <div class="footer-creditos">
+        <p>&copy; 2026 Big-O-1-Team. Todos os direitos reservados.</p>
+      </div>
+
+    </div>
   </footer>
 
-
+  <!-- Scripts: um arquivo por responsabilidade, carregados nesta ordem -->
   <script src="js/stepper.js"></script>
   <script src="js/passo1-escolha-cartao.js"></script>
   <script src="js/passo2-formulario.js"></script>
