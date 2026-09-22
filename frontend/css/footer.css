@@ -1,0 +1,25 @@
+.rodape {
+  background-color: var(--cor-azul-escuro);
+  padding: var(--espaco-xl) 0;
+  text-align: center;
+}
+
+.rodape-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-md);
+  margin-bottom: var(--espaco-lg);
+}
+
+.rodape-links a {
+  color: var(--cor-branco);
+  font-size: var(--tamanho-texto);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.rodape-creditos p {
+  color: var(--cor-cinza-texto);
+  font-size: var(--tamanho-texto);
+  margin-top: var(--espaco-sm);
+}
