@@ -13,3 +13,7 @@ class RedesParceirasResponse(BaseModel):
     responsavel: str
     descricao: str
     status: str
+    
+class BuscaLojasOut(BaseModel):
+    uf: str
+    redes: list[RedeParceiraOut]
