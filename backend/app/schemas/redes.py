@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-class RedesResponse(BaseModel):
+class RedesParceirasResponse(BaseModel):
     id_rede: int
     nome: str
     tipo: str
