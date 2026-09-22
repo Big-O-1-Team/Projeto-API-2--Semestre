@@ -1,0 +1,33 @@
+#faq {
+  padding: var(--espaco-xl) 0;
+  background-color: var(--cor-branco);
+}
+
+.faq-titulo {
+  font-size: var(--tamanho-titulo);
+  color: var(--cor-azul-escuro);
+  margin-bottom: var(--espaco-lg);
+  text-align: center;
+}
+
+.faq-item {
+  background-color: var(--cor-cinza-claro);
+  border-radius: var(--raio-padrao);
+  margin-bottom: var(--espaco-md);
+  padding: var(--espaco-md);
+}
+
+.faq-pergunta {
+  font-size: var(--tamanho-subtitulo);
+  font-weight: bold;
+  color: var(--cor-preto-texto);
+  cursor: pointer;
+  list-style: none; /* Remove a setinha padrão*/
+}
+
+/* Espaçamento da resposta ao abrir */
+.faq-resposta {
+  font-size: var(--tamanho-texto);
+  color: var(--cor-cinza-texto);
+  margin-top: var(--espaco-sm);
+}
