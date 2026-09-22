@@ -93,3 +93,25 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 
 ---
 </div>
+
+## Executando o projeto localmente
+
+Com Docker e Docker Compose instalados, execute na raiz do projeto:
+
+```bash
+docker compose up --build
+```
+
+Acesse:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+
+A primeira Sprint possui fluxo funcional de escolha de cartão, cadastro dos dados pessoais, busca de lojas parceiras por CEP para Cartão Loja Física e criação da solicitação com status inicial `EM_ANALISE`.
+
+Detalhes técnicos e lista completa de alterações: [SPRINT1_ALTERACOES.md](SPRINT1_ALTERACOES.md).
+
+Manual de instalação: [docs/MANUAL_INSTALACAO.md](docs/MANUAL_INSTALACAO.md).
+
+Manual do usuário da Sprint 1: [docs/MANUAL_USUARIO_SPRINT1.md](docs/MANUAL_USUARIO_SPRINT1.md).

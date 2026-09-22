@@ -1,0 +1,50 @@
+.prova-social {
+  padding: 76px 0;
+  background: var(--cor-azul-escuro);
+  color: white;
+}
+
+.prova-social__subtitulo {
+  color: #a9c3ff;
+}
+
+.prova-social h2 {
+  margin-bottom: 38px;
+  text-align: center;
+  font-size: 30px;
+}
+
+.prova-social__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.prova-social__grid article {
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.prova-social__grid span {
+  color: #a9c3ff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.prova-social__grid h3 {
+  margin: 8px 0 6px;
+  font-size: 19px;
+}
+
+.prova-social__grid p {
+  color: #cfd8eb;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .prova-social__grid {
+    grid-template-columns: 1fr;
+  }
+}
