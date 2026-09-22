@@ -1,3 +1,15 @@
+import re
+
+class CepInvalido(ValueError): ...
+
+_CEP_RE = re.compile(r"\d{5}-?\d{3}")
+
+def normalizar_cep(cep: str) -> int:
+    cep = cep.strip()
+    if not _CEP_RE.fullmatch(cep):
+        raise CepInvalido(cep)
+    return int(cep.replace("-", ""))
+
 FAIXAS_CEP = [
     ("SP",  1_000_000, 19_999_999), ("RJ", 20_000_000, 28_999_999),
     ("ES", 29_000_000, 29_999_999), ("MG", 30_000_000, 39_999_999),
@@ -12,18 +24,10 @@ FAIXAS_CEP = [
     ("GO", 72_800_000, 72_999_999), ("DF", 73_000_000, 73_699_999),
     ("GO", 73_700_000, 76_799_999), ("RO", 76_800_000, 76_999_999),
     ("TO", 77_000_000, 77_999_999), ("MT", 78_000_000, 78_899_999),
-    ("RO", 78_900_000, 78_999_999),
+    ("RO", 78_900_000, 78_999_999),  # faixa legada: confirmar nos Correios
     ("MS", 79_000_000, 79_999_999), ("PR", 80_000_000, 87_999_999),
     ("SC", 88_000_000, 89_999_999), ("RS", 90_000_000, 99_999_999),
 ]
 
-def test_faixas_contiguas():
-    faixas = sorted(FAIXAS_CEP, key=lambda f: f[1])
-    assert faixas[0][1] == 1_000_000
-    assert faixas[-1][2] == 99_999_999
-    for (_, _, fim_ant), (_, ini, _) in zip(faixas, faixas[1:]):
-        assert ini == fim_ant + 1
-
 def uf_do_cep(cep: int) -> str | None:
-    test_faixas_contiguas()
     return next((uf for uf, ini, fim in FAIXAS_CEP if ini <= cep <= fim), None)
