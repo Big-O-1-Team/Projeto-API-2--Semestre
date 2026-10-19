@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href ="#equipe"> Equipe</a>  |
+    <a href ="#tec"> Tecnologias utilizadas</a>  |
   <a href ="#backlog"> Product Backlog</a>  |
   <a href ="#desafio"> Desafio</a>  |
   <a href ="#solução"> Solução</a>  |
@@ -13,6 +14,11 @@
   <a href ="#dod">DoD</a>  |
   <a href ="#sprint"> Cronograma de Sprints</a>  |
 </p>
+<ul>
+  <li>
+    <a href=''>Video do funcionamento🎥</a>
+  </li>  
+</ul>
 
 ---
 <div align="center">
@@ -76,6 +82,19 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 |  **SPRINT 2** | 05/10 - 25/10 | [Sprint 2 Docs](docs/sprints/sprint-2) |
 |  **SPRINT 3** | 02/11 - 22/11 | [Sprint 3 Docs](docs/sprints/sprint-3) |
 
+## 💻 Tecnologias utilizadas <a id="tec"></a>
+<p>
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" width="50" height="50" alt="HTML5">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" width="50" height="50" alt="CSS3">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="50" height="50" alt="JavaScript">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" width="50" height="50" alt="FastAPI">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" width="50" height="50" alt="MySQL">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="50" height="50" alt="Docker">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" width="50" height="50" alt="Git">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="50" height="50" alt="GitHub">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg" width="50" height="50" alt="Jira">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" width="50" height="50" alt="VS Code">
+</p>
 
 <div align = "center">
 
@@ -93,3 +112,25 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 
 ---
 </div>
+
+## Executando o projeto localmente
+
+Com Docker e Docker Compose instalados, execute na raiz do projeto:
+
+```bash
+docker compose up --build
+```
+
+Acesse:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+
+A primeira Sprint possui fluxo funcional de escolha de cartão, cadastro dos dados pessoais, busca de lojas parceiras por CEP para Cartão Loja Física e criação da solicitação com status inicial `EM_ANALISE`.
+
+Detalhes técnicos e lista completa de alterações: [SPRINT1_ALTERACOES.md](SPRINT1_ALTERACOES.md).
+
+Manual de instalação: [docs/MANUAL_INSTALACAO.md](docs/MANUAL_INSTALACAO.md).
+
+Manual do usuário da Sprint 1: [docs/MANUAL_USUARIO_SPRINT1.md](docs/MANUAL_USUARIO_SPRINT1.md).
