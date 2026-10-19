@@ -7,6 +7,7 @@ from app.models.partner_store import PartnerStore
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
+from app.services.colaborador_service import verificar_colaborador
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
 
@@ -24,6 +25,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     telefone = somente_numeros(solicitacao.telefone)
     cep = limpar_cep(solicitacao.cep)
     tipo_cartao = solicitacao.tipo_cartao.strip().upper()
+    eh_colaborador = verificar_colaborador(cpf, db)
 
     if len(nome) < 3:
         raise HTTPException(status_code=400, detail="Informe seu nome completo.")
@@ -73,6 +75,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         usuario.cpf = cpf
         usuario.telefone = telefone
         usuario.cep = cep
+        usuario.colaborador_dm = eh_colaborador
     else:
         usuario = User(
             nome=nome,
@@ -80,7 +83,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             email=str(solicitacao.email),
             telefone=telefone,
             cep=cep,
-            colaborador_dm=False,
+            colaborador_dm=eh_colaborador,
         )
         db.add(usuario)
         db.flush()
