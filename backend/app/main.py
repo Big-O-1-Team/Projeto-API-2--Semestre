@@ -9,6 +9,7 @@ from app.models.application import Application
 from app.models.card import Card
 from app.models.partner_store import PartnerStore
 from app.models.user import User
+from app.models.colaborador import Colaborador
 from app.seed import seed_database
 
 Base.metadata.create_all(bind=engine)
