@@ -2,6 +2,12 @@
 
 # Documentação - Sprint 1
 
+<ul>
+  <li>
+    <a href='https://youtu.be/QCPprjqUttc'>Video do funcionamento🎥</a>
+  </li>  
+</ul>
+
 | Rank | Prioridade | User Story | Estimativa de esforço | Sprint |
 |:---:|:---:|:---|:---:|:---:|
 | 1 | Alta | Como cliente, quero preencher meus dados pessoais, para iniciar minha solicitação de cartão. | 3 | Sprint 1 |
