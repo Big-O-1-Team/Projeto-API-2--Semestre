@@ -2,7 +2,7 @@ const PassoUm = {
   cartoesFallback: [
     { tipo: "DM", nome: "Cartão DM", descricao: "Inicie sua solicitação do Cartão DM." },
     { tipo: "LOJA_FISICA", nome: "Cartão Loja Física", descricao: "Escolha uma loja parceira disponível no seu estado." },
-    { tipo: "LOJA_DIGITAL", nome: "Cartão Loja Digital", descricao: "Registre sua solicitação para a opção digital." }
+    { tipo: "LOJA_DIGITAL", nome: "Cartão Loja Digital", descricao: "Solicitação de qualquer estado, sem emissão de cartão físico." }
   ],
 
   async init() {

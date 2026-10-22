@@ -1,5 +1,5 @@
 import re
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
@@ -7,6 +7,7 @@ from app.models.partner_store import PartnerStore
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
+from app.services.collaborator_service import eh_colaborador
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
 
@@ -23,7 +24,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     cpf = somente_numeros(solicitacao.cpf)
     telefone = somente_numeros(solicitacao.telefone)
     cep = limpar_cep(solicitacao.cep)
-    tipo_cartao = solicitacao.tipo_cartao.strip().upper()
+    tipo_cartao = solicitacao.tipo_cartao
 
     if len(nome) < 3:
         raise HTTPException(status_code=400, detail="Informe seu nome completo.")
@@ -60,6 +61,9 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
                 detail="A loja escolhida não pertence ao estado do CEP informado.",
             )
 
+    if tipo_cartao != "LOJA_FISICA" and solicitacao.loja_id is not None:
+        raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja física.")
+
     usuario_cpf = db.query(User).filter(User.cpf == cpf).first()
     usuario_email = db.query(User).filter(User.email == str(solicitacao.email)).first()
 
@@ -67,12 +71,14 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="CPF e e-mail pertencem a cadastros diferentes.")
 
     usuario = usuario_cpf or usuario_email
+    colaborador = eh_colaborador(cpf)
     if usuario:
         usuario.nome = nome
         usuario.email = str(solicitacao.email)
         usuario.cpf = cpf
         usuario.telefone = telefone
         usuario.cep = cep
+        usuario.colaborador_dm = colaborador
     else:
         usuario = User(
             nome=nome,
@@ -80,16 +86,20 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             email=str(solicitacao.email),
             telefone=telefone,
             cep=cep,
-            colaborador_dm=False,
+            colaborador_dm=colaborador,
         )
         db.add(usuario)
         db.flush()
+
+    status_solicitacao = "EM_ANALISE"
+    if colaborador:
+        status_solicitacao = "APROVADO" if tipo_cartao == "DM" else "REPROVADO"
 
     nova_solicitacao = Application(
         usuario_id=usuario.id,
         tipo_cartao=tipo_cartao,
         loja_id=loja.id if loja else None,
-        status="EM_ANALISE",
+        status=status_solicitacao,
     )
 
     db.add(nova_solicitacao)
@@ -99,8 +109,21 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
 
 @router.get("/{solicitacao_id}", response_model=ApplicationResponse)
-def buscar_solicitacao(solicitacao_id: int, db: Session = Depends(get_db)):
-    solicitacao = db.query(Application).filter(Application.id == solicitacao_id).first()
+def buscar_solicitacao(
+    solicitacao_id: int,
+    cpf: str = Query(min_length=11, max_length=14),
+    db: Session = Depends(get_db),
+):
+    cpf_limpo = somente_numeros(cpf)
+    if len(cpf_limpo) != 11:
+        raise HTTPException(status_code=400, detail="Informe um CPF válido.")
+
+    solicitacao = (
+        db.query(Application)
+        .join(User, Application.usuario_id == User.id)
+        .filter(Application.id == solicitacao_id, User.cpf == cpf_limpo)
+        .first()
+    )
     if not solicitacao:
-        raise HTTPException(status_code=404, detail="Solicitação não encontrada.")
+        raise HTTPException(status_code=404, detail="Solicitação não encontrada para esse CPF.")
     return solicitacao

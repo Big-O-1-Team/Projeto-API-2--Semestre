@@ -8,6 +8,7 @@ const PassoDois = {
     passo.innerHTML = `
       <h3 class="passo__titulo">Agora, conte um pouco sobre você</h3>
       <p class="passo__descricao">Cartão selecionado: <strong>${AppState.nomeCartao || AppState.tipoCartao}</strong></p>
+      ${AppState.tipoCartao === "LOJA_DIGITAL" ? '<p class="aviso-digital">O Cartão Loja Digital não possui emissão de via física e pode ser solicitado de qualquer estado.</p>' : ""}
       <form id="form-dados" novalidate>
         <div class="form-grid">
           <div class="campo campo--completo">
@@ -108,7 +109,7 @@ const PassoDois = {
         <p>${resposta.total} opção(ões) encontrada(s). Escolha uma para continuar.</p>
         <select id="loja-id" aria-label="Escolha uma loja parceira">
           <option value="">Selecione uma loja</option>
-          ${resposta.lojas.map((loja) => `<option value="${loja.id}">${loja.nome} — ${loja.cidade}</option>`).join("")}
+          ${resposta.lojas.map((loja) => `<option value="${loja.id}">${loja.nome} — ${loja.cidade}${loja.emite_cartao_credito ? " (emite cartão)" : ""}</option>`).join("")}
         </select>
       `;
 

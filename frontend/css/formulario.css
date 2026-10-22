@@ -344,3 +344,123 @@
     grid-template-columns: 1fr;
   }
 }
+
+.consulta-status {
+  padding: 70px 0;
+  background: linear-gradient(135deg, #edf4ff 0%, #fff 100%);
+}
+
+.consulta-status__container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.consulta-status__etiqueta {
+  color: var(--cor-azul);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.consulta-status h2 {
+  color: var(--cor-azul-escuro);
+  margin: 10px 0;
+  font-size: clamp(26px, 4vw, 36px);
+}
+
+.consulta-status__container > div > p {
+  color: var(--cor-cinza-texto);
+  max-width: 420px;
+}
+
+.consulta-status__form {
+  display: grid;
+  gap: 14px;
+  padding: 26px;
+  border: 1px solid var(--cor-cinza-borda);
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 18px 45px rgba(15, 31, 75, 0.08);
+}
+
+.consulta-status__resultado {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--cor-azul-claro);
+  color: var(--cor-azul-escuro);
+}
+
+.consulta-status__resultado p {
+  margin-top: 5px;
+}
+
+.acoes-passo--centro {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.status-box[data-status="APROVADO"] .status-box__icone {
+  background: #e7f7ef;
+  color: #168453;
+}
+
+.status-box[data-status="REPROVADO"] .status-box__icone {
+  background: #fff0ef;
+  color: #b42d35;
+}
+
+@media (max-width: 720px) {
+  .consulta-status__container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .consulta-status__form {
+    padding: 22px 18px;
+  }
+}
+
+.aviso-digital {
+  padding: 14px 16px;
+  margin-bottom: 22px;
+  border: 1px solid #b7cefa;
+  border-radius: 12px;
+  background: #eff5ff;
+  color: #184083;
+  font-size: 14px;
+}
+
+.passo {
+  box-shadow: 0 20px 55px rgba(15, 31, 75, 0.07);
+}
+
+.cartao-opcao {
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.btn-primario {
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.btn-primario:not(:disabled):hover {
+  background: #153a99;
+  transform: translateY(-1px);
+}
+
+.btn-secundario:hover {
+  border-color: #aebfe2;
+  background: #f7faff;
+}
+
+:where(button, input, select):focus-visible {
+  outline: 3px solid #8fb1ff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao-opcao,
+  .btn-primario {
+    transition: none;
+  }
+}

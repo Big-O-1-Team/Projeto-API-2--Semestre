@@ -21,7 +21,7 @@ CARTOES = [
     {
         "nome": "Cartão Loja Digital",
         "tipo": "LOJA_DIGITAL",
-        "descricao": "Opção digital do Cartão Loja.",
+        "descricao": "Cartão Loja Digital sem via física e sem restrição de estado.",
         "fisico": False,
         "restricao_geografica": False,
     },

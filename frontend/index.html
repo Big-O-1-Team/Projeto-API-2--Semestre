@@ -20,6 +20,7 @@
       <nav class="header__nav" aria-label="Navegação principal">
         <a href="#beneficios">Benefícios</a>
         <a href="#como-funciona">Como funciona</a>
+        <a href="#consultar-status">Acompanhar pedido</a>
         <a href="#faq">Dúvidas</a>
       </nav>
       <button class="header__cta" id="btn-solicitar-cartao">Solicitar cartão</button>
@@ -98,6 +99,28 @@
       </div>
     </section>
 
+    <section id="consultar-status" class="consulta-status">
+      <div class="container consulta-status__container">
+        <div>
+          <span class="consulta-status__etiqueta">ACOMPANHAMENTO</span>
+          <h2>Consulte sua solicitação</h2>
+          <p>Use o número recebido e seu CPF para acompanhar a situação do pedido.</p>
+        </div>
+        <form id="consulta-status-form" class="consulta-status__form">
+          <div class="campo">
+            <label for="numero-solicitacao">Número da solicitação</label>
+            <input id="numero-solicitacao" inputmode="numeric" pattern="[0-9]+" required placeholder="Ex.: 12">
+          </div>
+          <div class="campo">
+            <label for="cpf-consulta">CPF</label>
+            <input id="cpf-consulta" inputmode="numeric" required placeholder="000.000.000-00">
+          </div>
+          <button class="btn-primario" type="submit">Consultar status</button>
+          <div id="consulta-status-resultado" class="consulta-status__resultado" aria-live="polite" hidden></div>
+        </form>
+      </div>
+    </section>
+
     <section id="faq" class="faq">
       <div class="container">
         <p class="faq__subtitulo">DÚVIDAS FREQUENTES</p>
@@ -132,5 +155,6 @@
   <script src="js/passo2-formulario.js"></script>
   <script src="js/passo3-resultado.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/status-consulta.js"></script>
 </body>
 </html>
