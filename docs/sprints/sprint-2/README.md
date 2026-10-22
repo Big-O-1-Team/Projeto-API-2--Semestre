@@ -23,6 +23,14 @@ A sprint 2 traz um novo design para a landing page e novas funcionalidades. O si
 
 ## Fluxo de demonstração
 
+Use "12345678901" para demonstrar as regras para um colaborador DM.
+
+1. Solicitar Cartão DM utilizando um CPF cadastrado como colaborador DM.
+2. Solicitar Cartão Loja Física utilizando o mesmo CPF e demonstrar a reprovação automática.
+3. Realizar uma solicitação com CPF não cadastrado como colaborador e demonstrar o status "Em análise".
+4. Consultar uma solicitação pelo protocolo e CPF, verificando o status retornado.
+5. Mostrar os avisos sobre a ausência de emissão física do Cartão Loja Digital.
+
 ## DoR - Definition of Ready
 
 | Critério | Descrição |
@@ -47,7 +55,5 @@ A sprint 2 traz um novo design para a landing page e novas funcionalidades. O si
     <a href=''>Video do funcionamento🎥 (Ainda não foi adicionado)</a>
   </li>  
 </ul>
-
-## Próximas Sprints
 
 As regras de identificação de colaboradores, aprovação/reprovação automática e evolução do Cartão Loja Digital continuam para a Sprint 2. O painel de cadastro de parceiros, ofertas alternativas e atribuição de PACs continuam para a Sprint 3.
