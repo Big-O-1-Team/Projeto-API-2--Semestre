@@ -55,5 +55,3 @@ Use "12345678901" para demonstrar as regras para um colaborador DM.
     <a href=''>Video do funcionamento🎥 (Ainda não foi adicionado)</a>
   </li>  
 </ul>
-
-As regras de identificação de colaboradores, aprovação/reprovação automática e evolução do Cartão Loja Digital continuam para a Sprint 2. O painel de cadastro de parceiros, ofertas alternativas e atribuição de PACs continuam para a Sprint 3.
