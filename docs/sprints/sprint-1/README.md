@@ -2,12 +2,6 @@
 
 # Documentação - Sprint 1
 
-<ul>
-  <li>
-    <a href='https://youtu.be/QCPprjqUttc'>Video do funcionamento🎥</a>
-  </li>  
-</ul>
-
 | Rank | Prioridade | User Story | Estimativa de esforço | Sprint |
 |:---:|:---:|:---|:---:|:---:|
 | 1 | Alta | Como cliente, quero preencher meus dados pessoais, para iniciar minha solicitação de cartão. | 3 | Sprint 1 |
@@ -60,6 +54,13 @@ Use `12210-000` para demonstrar a busca de lojas em SP.
 | Código revisado | O código deve ser revisado pela equipe antes do fechamento. |
 | Validação do PO | O Product Owner valida a entrega com base nos critérios definidos. |
 | Pronto para entrega | O item está funcional e pode ser demonstrado ao parceiro/professor. |
+
+## Vídeo de Execução
+<ul>
+  <li>
+    <a href='https://youtu.be/QCPprjqUttc'>Video do funcionamento🎥</a>
+  </li>  
+</ul>
 
 ## Próximas Sprints
 
