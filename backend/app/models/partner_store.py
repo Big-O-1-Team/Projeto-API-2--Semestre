@@ -12,3 +12,8 @@ class PartnerStore(Base):
     endereco = Column(String(180), nullable=False)
     cep = Column(String(8), nullable=False)
     ativo = Column(Boolean, nullable=False, default=True)
+    emite_cartao_credito = Column(Boolean, nullable=False, default=False, server_default="0")
+
+    @property
+    def role(self) -> str:
+        return "LOJA_EMISSORA" if self.emite_cartao_credito else "LOJA_PARCEIRA"

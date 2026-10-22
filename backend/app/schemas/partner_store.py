@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PartnerStoreResponse(BaseModel):
@@ -8,9 +8,10 @@ class PartnerStoreResponse(BaseModel):
     cidade: str
     endereco: str
     cep: str
+    emite_cartao_credito: bool
+    role: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PartnerStoreSearchResponse(BaseModel):
@@ -18,3 +19,7 @@ class PartnerStoreSearchResponse(BaseModel):
     uf: str
     total: int
     lojas: list[PartnerStoreResponse]
+
+
+class StoreEmissionUpdate(BaseModel):
+    emite_cartao_credito: bool
