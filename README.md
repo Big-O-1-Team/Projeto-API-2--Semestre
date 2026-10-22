@@ -14,11 +14,6 @@
   <a href ="#dod">DoD</a>  |
   <a href ="#sprint"> Cronograma de Sprints</a>  |
 </p>
-<ul>
-  <li>
-    <a href=''>Video do funcionamento🎥</a>
-  </li>  
-</ul>
 
 ---
 <div align="center">
