@@ -45,12 +45,11 @@ O sistema recebe os dados pessoais e o CEP do cliente, identifica automaticament
 |4|Média|Como cliente, quero informar meu CEP ao pedir Cartão Loja física, para que o sistema me mostre só lojas do meu estado.|5|Sprint 1|
 |**5**|**Alta**|**Como cliente, quero solicitar Cartão Loja Digital de qualquer estado, para não ser bloqueado pela restrição geográfica.**|**2**|**Sprint 2**|
 |6|Alta|Como cliente, quero ser avisado que o Cartão Loja Digital não emite via física, para decidir com clareza antes de solicitar.|2|Sprint 2|
-|5|Alta|Como sistema, quero um design inspirado no padrão utilizado pelos sistemas oficiais da empresa|5|Sprint 2|
-|6|Média|Como sistema, quero verificar se o cliente é um colaborador DM, para aplicar a aprovação automática do Cartão DM |5|Sprint 2|
-|7|Média|Como sistema, quero reprovar automaticamente pedidos de Cartão Loja feitos por colaboradores, para seguir a regra de negócio.|3|Sprint 2|
-|**8**|**Média**|**Como administrador DM, quero cadastrar um novo lojista parceiro, para que clientes já consigam fazer PAC para ele.**|**5**|**Sprint 3**|
-|9|Baixa|Como cliente reprovado, quero receber uma oferta de outro produto (EP, DMCred), para ter uma alternativa mesmo sem aprovação do cartão.|5|Sprint 3|
-|10|Baixa|Como parceiro, quero um campo para cadastrar nossos contribuidores, para atribuição das PACs a eles|5|Sprint 3|
+|7|Média|Como sistema, quero verificar se o cliente é um colaborador DM, para aplicar a aprovação automática do Cartão DM |5|Sprint 2|
+|8|Média|Como sistema, quero reprovar automaticamente pedidos de Cartão Loja feitos por colaboradores, para seguir a regra de negócio.|3|Sprint 2|
+|**9**|**Média**|**Como administrador DM, quero cadastrar um novo lojista parceiro, para que clientes já consigam fazer PAC para ele.**|**5**|**Sprint 3**|
+|10|Baixa|Como cliente reprovado, quero receber uma oferta de outro produto (EP, DMCred), para ter uma alternativa mesmo sem aprovação do cartão.|5|Sprint 3|
+|11|Baixa|Como parceiro, quero um campo para cadastrar nossos contribuidores, para atribuição das PACs a eles|5|Sprint 3|
 
 </div>
 
