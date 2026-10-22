@@ -11,7 +11,15 @@
 
 ## Valor entregue
 
+A sprint 2 traz um novo design para a landing page e novas funcionalidades. O sistema teve seu design de front-end refeito, verifica de forma segura e automática a aprovabilidade de solicitações para colaboradores da DM, informa de forma clara o cliente de que o Cartão Loja Digital não é emitido em via física e permite o acompanhamento do status de andamento da solicitação do cartão.
+
 ## Critérios de aceitação atendidos
+- Front-end inspirado nos sites próprios da empresa parceira (DM);
+- O sistema verifica — de forma segura, sem evidenciar regras de aceitação para o público geral — se o CPF informado pertence a algum colaborador da empresa parceira (DM);
+- A solicitação de um cartão DM sempre é aprovada para um colaborador;
+- A solicitação de qualquer cartão que não seja o DM é reprovada para um colaborador;
+- O sistema informa duplamente — na primeira e segunda etapa do campo de solicitação — o cliente sobre a não emissão de via física para o Cartão de Loja Digital;
+- O campo de acompanhamento do status da solicitação permite ao cliente verificar o andamento de sua solicitação a partir de seu número de protocolo e CPF.
 
 ## Fluxo de demonstração
 
