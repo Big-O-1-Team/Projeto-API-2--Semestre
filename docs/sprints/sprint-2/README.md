@@ -2,6 +2,12 @@
 
 # Documentação - Sprint 2
 
+| Rank  | Prioridade |                                                        User Story                                                            | Estimativa de esforço | Sprint
+|:-----:|:----------:|:----------------------------------------------------------------------------------------------------------------------------:|:----------:|:-----------:
+|**1**|**Alta**|**Como sistema, quero verificar se o cliente é um colaborador DM, para aplicar a aprovação automática do Cartão DM**|**5**|**Sprint 2**|
+|2|Alta|Como sistema, quero reprovar automaticamente pedidos de Cartão Loja feitos por colaboradores, para seguir a regra de negócio.|3|Sprint 2|
+|4|Média|Como cliente, quero ser avisado que o Cartão Loja Digital não emite via física, para decidir com clareza antes de solicitar.|2|Sprint 2|
+|5|Média|Como cliente, quero acompanhar o status do andamento da minha solicitação |3|Sprint 2|
 
 ## Valor entregue
 
