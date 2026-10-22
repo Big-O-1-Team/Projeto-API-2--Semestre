@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from app.services.collaborator_service import autenticar_colaborador, gerar_token, limpar_cpf, validar_token
 
 router = APIRouter(prefix="/colaboradores", tags=["Colaboradores"])
+security = HTTPBearer()
 
 
 class LoginColaborador(BaseModel):
@@ -25,8 +27,11 @@ def login(dados: LoginColaborador):
 
 
 @router.get("/eu")
-def colaborador_logado(authorization: str = Header(default="")):
-    tipo, _, token = authorization.partition(" ")
-    if tipo.lower() != "bearer" or not token:
-        raise HTTPException(status_code=401, detail="Informe o token de acesso.")
-    return {"cpf": validar_token(token), "colaborador_dm": True}
+def colaborador_logado(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    return {
+        "cpf": validar_token(token),
+        "colaborador_dm": True
+    }
