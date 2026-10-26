@@ -1,0 +1,66 @@
+.beneficios {
+  padding: 78px 0;
+  background: #ffffff;
+}
+
+.beneficios__subtitulo,
+.prova-social__subtitulo,
+.faq__subtitulo {
+  margin-bottom: 8px;
+  text-align: center;
+  color: var(--cor-azul);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.beneficios__titulo {
+  margin-bottom: 38px;
+  text-align: center;
+  font-size: 30px;
+  color: var(--cor-azul-escuro);
+}
+
+.beneficios__cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.beneficio-card {
+  display: flex;
+  gap: 15px;
+  padding: 22px;
+  border: 1px solid var(--cor-cinza-borda);
+  border-radius: 16px;
+  background: #fbfcfe;
+}
+
+.beneficio-card__icone {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--cor-azul-claro);
+  color: var(--cor-azul);
+  font-weight: 800;
+}
+
+.beneficio-card h3 {
+  margin-bottom: 5px;
+  color: var(--cor-azul-escuro);
+  font-size: 16px;
+}
+
+.beneficio-card p {
+  color: var(--cor-cinza-texto);
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .beneficios__cards {
+    grid-template-columns: 1fr;
+  }
+}
