@@ -6,6 +6,8 @@ import os
 import re
 import time
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from app.models.collaborator import Collaborator
 
 
 def limpar_cpf(cpf: str) -> str:
@@ -22,8 +24,18 @@ def credenciais_colaboradores() -> dict[str, str]:
     return {limpar_cpf(str(cpf)): str(senha) for cpf, senha in dados.items() if len(limpar_cpf(str(cpf))) == 11}
 
 
-def eh_colaborador(cpf: str) -> bool:
-    return limpar_cpf(cpf) in credenciais_colaboradores()
+def modalidade_autorizada(cpf: str, db: Session | None = None) -> str | None:
+    cpf_limpo = limpar_cpf(cpf)
+    if db is not None:
+        cadastro = db.query(Collaborator).filter(Collaborator.cpf == cpf_limpo).first()
+        if cadastro is not None:
+            return cadastro.modalidade_autorizada if cadastro.ativo else None
+
+    return "DM" if cpf_limpo in credenciais_colaboradores() else None
+
+
+def eh_colaborador(cpf: str, db: Session | None = None) -> bool:
+    return modalidade_autorizada(cpf, db) is not None
 
 
 def autenticar_colaborador(cpf: str, senha: str) -> bool:

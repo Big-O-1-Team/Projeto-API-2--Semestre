@@ -7,7 +7,7 @@ from app.models.partner_store import PartnerStore
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationListResponse, ConsultaCpf
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
-from app.services.collaborator_service import eh_colaborador
+from app.services.collaborator_service import modalidade_autorizada
 from app.middleware.rate_limit import verificar_limite_consulta
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
@@ -72,7 +72,8 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="CPF e e-mail pertencem a cadastros diferentes.")
 
     usuario = usuario_cpf or usuario_email
-    colaborador = eh_colaborador(cpf)
+    modalidade_permitida = modalidade_autorizada(cpf, db)
+    colaborador = modalidade_permitida is not None
     if usuario:
         usuario.nome = nome
         usuario.email = str(solicitacao.email)
@@ -94,7 +95,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
     status_solicitacao = "EM_ANALISE"
     if colaborador:
-        status_solicitacao = "APROVADO" if tipo_cartao == "DM" else "REPROVADO"
+        status_solicitacao = "APROVADO" if tipo_cartao == modalidade_permitida else "REPROVADO"
 
     nova_solicitacao = Application(
         usuario_id=usuario.id,

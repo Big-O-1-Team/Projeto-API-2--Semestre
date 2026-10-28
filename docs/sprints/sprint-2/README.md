@@ -23,7 +23,20 @@ A sprint 2 traz um novo design para a landing page e novas funcionalidades. O si
 
 ## Fluxo de demonstração
 
-Use "12345678901" para demonstrar as regras para um colaborador DM.
+Para demonstrar a aprovação automática do Cartão DM, use um destes colaboradores fictícios cadastrados no banco de dados:
+
+| CPF de demonstração | Perfil | Modalidade autorizada |
+|---|---|---|
+| 32376226643 | Colaborador Fictício 01 | Cartão DM |
+| 33143237945 | Colaborador Fictício 02 | Cartão DM |
+| 21953320694 | Colaborador Fictício 03 | Cartão DM |
+| 63380575747 | Colaborador Fictício 04 | Cartão DM |
+
+Os registros são criados automaticamente no início da API, sem duplicação e sem substituir cadastros existentes. São usados apenas para a demonstração acadêmica; a aprovação é uma pré-qualificação fictícia, não uma análise de crédito real.
+
+Com um desses CPFs, uma solicitação de Cartão DM fica **APROVADA**. Solicitações de Cartão Loja Física ou Cartão Loja Digital ficam **REPROVADAS**. Clientes fora do cadastro de colaboradores permanecem **EM_ANALISE**, conforme a regra da sprint.
+
+O formulário exige nome, CPF, e-mail, telefone e CEP válidos no formato esperado. Para Cartão Loja Física, a loja deve ser ativa e pertencer ao estado do CEP informado.
 
 1. Solicitar Cartão DM utilizando um CPF cadastrado como colaborador DM.
 2. Solicitar Cartão Loja Física utilizando o mesmo CPF e demonstrar a reprovação automática.
