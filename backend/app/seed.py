@@ -1,5 +1,6 @@
 from app.database import SessionLocal
 from app.models.card import Card
+from app.models.collaborator import Collaborator
 from app.models.partner_store import PartnerStore
 
 
@@ -38,6 +39,13 @@ LOJAS = [
     ("Loja Parceira Centro Salvador", "BA", "Salvador", "Avenida Bahia, 95", "40020000"),
 ]
 
+COLABORADORES_FICTICIOS = [
+    {"cpf": "32376226643", "nome": "Colaborador Fictício 01", "email": "colaborador01@example.com", "telefone": "12990000001", "cep": "12210000", "modalidade_autorizada": "DM", "ativo": True},
+    {"cpf": "33143237945", "nome": "Colaborador Fictício 02", "email": "colaborador02@example.com", "telefone": "12990000002", "cep": "12210000", "modalidade_autorizada": "DM", "ativo": True},
+    {"cpf": "21953320694", "nome": "Colaborador Fictício 03", "email": "colaborador03@example.com", "telefone": "12990000003", "cep": "12210000", "modalidade_autorizada": "DM", "ativo": True},
+    {"cpf": "63380575747", "nome": "Colaborador Fictício 04", "email": "colaborador04@example.com", "telefone": "12990000004", "cep": "12210000", "modalidade_autorizada": "DM", "ativo": True},
+]
+
 
 def seed_database():
     db = SessionLocal()
@@ -60,6 +68,11 @@ def seed_database():
                         ativo=True,
                     )
                 )
+
+        for dados in COLABORADORES_FICTICIOS:
+            existe = db.query(Collaborator).filter(Collaborator.cpf == dados["cpf"]).first()
+            if not existe:
+                db.add(Collaborator(**dados))
 
         db.commit()
     finally:

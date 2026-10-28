@@ -10,6 +10,7 @@ from app.controllers.user_controller import router as user_router
 from app.middleware.rate_limit import limitar_requisicoes
 from app.models.application import Application
 from app.models.card import Card
+from app.models.collaborator import Collaborator
 from app.models.partner_store import PartnerStore
 from app.models.user import User
 from app.seed import seed_database
