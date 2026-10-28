@@ -1,13 +1,14 @@
 import re
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
 from app.models.partner_store import PartnerStore
 from app.models.user import User
-from app.schemas.application import ApplicationCreate, ApplicationResponse
+from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationListResponse, ConsultaCpf
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import eh_colaborador
+from app.middleware.rate_limit import verificar_limite_consulta
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
 
@@ -127,3 +128,30 @@ def buscar_solicitacao(
     if not solicitacao:
         raise HTTPException(status_code=404, detail="Solicitação não encontrada para esse CPF.")
     return solicitacao
+
+
+@router.post("/consultar", response_model=ApplicationListResponse)
+def consultar_solicitacoes_por_cpf(
+    consulta: ConsultaCpf,
+    request: Request,
+    pagina: int = Query(default=1, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
+    verificar_limite_consulta(request)
+    cpf = somente_numeros(consulta.cpf)
+    if len(cpf) != 11:
+        raise HTTPException(status_code=400, detail="Informe um CPF com 11 números.")
+
+    pedidos = (
+        db.query(Application)
+        .join(User, Application.usuario_id == User.id)
+        .filter(User.cpf == cpf)
+    )
+    total = pedidos.count()
+    solicitacoes = (
+        pedidos.order_by(Application.criado_em.desc(), Application.id.desc())
+        .offset((pagina - 1) * 20)
+        .limit(20)
+        .all()
+    )
+    return {"total": total, "solicitacoes": solicitacoes}

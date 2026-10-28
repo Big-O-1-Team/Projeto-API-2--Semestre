@@ -35,3 +35,23 @@ class ApplicationResponse(BaseModel):
     criado_em: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ConsultaCpf(BaseModel):
+    cpf: str = Field(min_length=11, max_length=14)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ApplicationSummary(BaseModel):
+    id: int
+    tipo_cartao: str
+    status: str
+    criado_em: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ApplicationListResponse(BaseModel):
+    total: int
+    solicitacoes: list[ApplicationSummary]

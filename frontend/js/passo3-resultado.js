@@ -32,9 +32,9 @@ const PassoTres = {
     `;
 
     document.getElementById("consultar-solicitacao").addEventListener("click", () => {
-      document.getElementById("numero-solicitacao").value = solicitacao.id;
       document.getElementById("cpf-consulta").value = AppState.dados.cpf;
       document.getElementById("consultar-status").scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("consulta-status-form").requestSubmit();
     });
 
     document.getElementById("nova-solicitacao").addEventListener("click", () => {
