@@ -464,3 +464,117 @@
     transition: none;
   }
 }
+
+.consulta-status__container {
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  align-items: start;
+  gap: clamp(24px, 5vw, 64px);
+}
+
+.consulta-status__form {
+  width: 100%;
+  min-width: 0;
+}
+
+.consulta-status__form .btn-primario {
+  min-height: 46px;
+}
+
+.consulta-status__resultado {
+  padding: 0;
+  max-height: 470px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.consulta-status__resumo {
+  margin: 2px 0 14px;
+  font-weight: 750;
+  font-size: 14px;
+  color: var(--cor-azul-escuro);
+}
+
+.consulta-status__lista {
+  display: grid;
+  gap: 10px;
+}
+
+.consulta-status__item {
+  padding: 15px;
+  border: 1px solid var(--cor-cinza-borda);
+  border-radius: 13px;
+  background: #f9fbff;
+}
+
+.consulta-status__item-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+
+.consulta-status__cartao {
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--cor-azul-escuro);
+}
+
+.consulta-status__detalhes {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  color: var(--cor-cinza-texto);
+  font-size: 12px;
+}
+
+.consulta-status__status {
+  border-radius: 99px;
+  padding: 5px 10px;
+  background: #fff2d9;
+  color: #946013;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.consulta-status__status[data-status="APROVADO"] {
+  background: #dff6ea;
+  color: #11623c;
+}
+
+.consulta-status__status[data-status="REPROVADO"] {
+  background: #ffeded;
+  color: #a12d35;
+}
+
+.consulta-status__vazio {
+  padding: 16px;
+  border: 1px dashed #cbd7eb;
+  border-radius: 12px;
+  color: var(--cor-cinza-texto);
+  background: #f8faff;
+  font-size: 14px;
+}
+
+.consulta-status__carregar {
+  width: 100%;
+  margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .consulta-status__container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .consulta-status__resultado {
+    max-height: 390px;
+  }
+
+  .consulta-status__item {
+    padding: 13px;
+  }
+}
