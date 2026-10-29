@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Projeto acadêmico de landing page para captação e pré-qualificação de clientes.">
-  <title>DM - Solicitação de Cartão</title>
+  <meta name="description" content="Protótipo acadêmico de solicitação de cartões DM com pré-qualificação e acompanhamento de pedido.">
+  <meta name="theme-color" content="#2329c5">
+  <title>Solicite seu cartão | DM — Projeto acadêmico</title>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/hero.css">
@@ -16,56 +17,82 @@
 <body>
   <header id="header" class="header">
     <div class="header__conteudo">
-      <a class="header__logo" href="#hero" aria-label="Ir para o início">DM</a>
+      <a class="header__marca" href="#hero" aria-label="DM — ir para o início">
+        <span class="header__logo" aria-hidden="true">dm<span class="header__ponto">.</span></span>
+        <span class="header__divisor" aria-hidden="true"></span>
+        <span class="header__nome">Cartões e crédito</span>
+      </a>
       <nav class="header__nav" aria-label="Navegação principal">
         <a href="#beneficios">Benefícios</a>
         <a href="#como-funciona">Como funciona</a>
         <a href="#consultar-status">Acompanhar pedido</a>
         <a href="#faq">Dúvidas</a>
       </nav>
-      <button class="header__cta" id="btn-solicitar-cartao">Solicitar cartão</button>
+      <button class="header__cta" id="btn-solicitar-cartao" type="button">Solicitar cartão <span aria-hidden="true">↗</span></button>
     </div>
   </header>
 
   <main>
     <section id="hero" class="hero">
+      <div class="hero__ornamento hero__ornamento--um" aria-hidden="true"></div>
+      <div class="hero__ornamento hero__ornamento--dois" aria-hidden="true"></div>
       <div class="hero__conteudo">
         <div class="hero__texto">
-          <span class="hero__tag">Solicitação simples e rápida</span>
-          <h1>Encontre a opção de cartão que combina com você</h1>
-          <p>Preencha seus dados, escolha o cartão e acompanhe o status inicial da sua solicitação em poucos passos.</p>
-          <button class="hero__cta" id="btn-hero-solicitar">Começar solicitação</button>
-          <small>Projeto acadêmico desenvolvido pela Equipe Big O.</small>
+          <span class="hero__tag"><span class="hero__tag-ponto"></span> Seu próximo passo começa aqui</span>
+          <h1>Mais possibilidades para <span>o seu dia a dia.</span></h1>
+          <p>Escolha o cartão que combina com você, faça sua solicitação em poucos passos e acompanhe tudo de forma simples.</p>
+          <div class="hero__acoes">
+            <button class="hero__cta" id="btn-hero-solicitar" type="button">Quero solicitar meu cartão <span aria-hidden="true">↗</span></button>
+            <a class="hero__link" href="#como-funciona">Entenda como funciona <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="hero__nota"><span aria-hidden="true">✦</span> Toda história merece crédito. <span class="hero__nota-separador">·</span> Protótipo acadêmico</div>
         </div>
-        <div class="hero__painel" aria-label="Resumo do processo">
-          <div class="hero__painel-topo">Pré-qualificação</div>
-          <div class="hero__etapa"><span>1</span><div><strong>Escolha seu cartão</strong><p>DM, Loja Física ou Loja Digital.</p></div></div>
-          <div class="hero__etapa"><span>2</span><div><strong>Informe seus dados</strong><p>Cadastro simples e consulta por CEP.</p></div></div>
-          <div class="hero__etapa"><span>3</span><div><strong>Receba o status</strong><p>Veja o resultado inicial da solicitação.</p></div></div>
+
+        <div class="hero__visual" aria-label="Ilustração de cartões e resumo das etapas de solicitação">
+          <div class="hero__brilho" aria-hidden="true"></div>
+          <div class="hero__cartao hero__cartao--fundo" aria-hidden="true">
+            <span class="hero__cartao-logo">dm<span>.</span></span>
+            <span class="hero__cartao-linhas"></span>
+          </div>
+          <div class="hero__cartao hero__cartao--frente" aria-hidden="true">
+            <div class="hero__cartao-topo"><span class="hero__cartao-logo">dm<span>.</span></span><span class="hero__cartao-chip"></span></div>
+            <div class="hero__cartao-baixo"><span>CARTÃO DM</span><strong>Mais liberdade.<br>Mais possibilidades.</strong></div>
+            <span class="hero__cartao-circulo"></span>
+          </div>
+          <div class="hero__etapas">
+            <div class="hero__etapas-titulo"><span class="hero__etapas-icone" aria-hidden="true">✓</span><strong>Simples do início ao fim</strong></div>
+            <div class="hero__etapa"><span>01</span><div><strong>Escolha seu cartão</strong><p>Encontre sua opção ideal.</p></div></div>
+            <div class="hero__etapa"><span>02</span><div><strong>Informe seus dados</strong><p>Preencha com tranquilidade.</p></div></div>
+            <div class="hero__etapa"><span>03</span><div><strong>Confira o resultado</strong><p>Acompanhe sua solicitação.</p></div></div>
+          </div>
+          <div class="hero__selo" aria-hidden="true"><span>3</span> passos</div>
         </div>
       </div>
+      <div class="hero__rodape" aria-hidden="true"><div class="container"><span>Uma experiência mais fácil para você</span><span>01 / 03</span></div></div>
     </section>
 
     <section id="beneficios" class="beneficios">
       <div class="container">
-        <p class="beneficios__subtitulo">POR QUE USAR ESTE FLUXO?</p>
-        <h2 class="beneficios__titulo">Um processo mais claro do início ao fim</h2>
+        <div class="secao-cabecalho">
+          <div><p class="beneficios__subtitulo">POR QUE ESCOLHER NOSSO FLUXO</p><h2 class="beneficios__titulo">Tudo mais simples.<br><span>Como deve ser.</span></h2></div>
+          <p class="secao-cabecalho__texto">Do primeiro clique ao acompanhamento, uma jornada pensada para você saber exatamente o que fazer.</p>
+        </div>
         <div class="beneficios__cards">
           <article class="beneficio-card">
-            <span class="beneficio-card__icone">✓</span>
-            <div><h3>Etapas simples</h3><p>O processo é dividido em passos curtos para facilitar o preenchimento.</p></div>
+            <span class="beneficio-card__icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></span>
+            <h3>Etapas simples</h3><p>Um processo organizado em passos claros e fáceis de preencher.</p><span class="beneficio-card__indice">01</span>
           </article>
           <article class="beneficio-card">
-            <span class="beneficio-card__icone">⌖</span>
-            <div><h3>Lojas por estado</h3><p>Ao escolher Cartão Loja Física, o CEP filtra as lojas parceiras disponíveis no seu estado.</p></div>
+            <span class="beneficio-card__icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18M5 10V6l7-3 7 3v4M5 10v10h14V10M9 20v-6h6v6"/></svg></span>
+            <h3>Lojas por estado</h3><p>Encontre lojas parceiras disponíveis no seu estado usando o CEP.</p><span class="beneficio-card__indice">02</span>
           </article>
           <article class="beneficio-card">
-            <span class="beneficio-card__icone">◎</span>
-            <div><h3>Status visível</h3><p>Ao finalizar, você recebe um número de solicitação e o status inicial do pedido.</p></div>
+            <span class="beneficio-card__icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>
+            <h3>Status visível</h3><p>Receba o número do pedido e consulte a situação da solicitação.</p><span class="beneficio-card__indice">03</span>
           </article>
           <article class="beneficio-card">
-            <span class="beneficio-card__icone">◇</span>
-            <div><h3>Três opções</h3><p>Escolha entre Cartão DM, Cartão Loja Física ou Cartão Loja Digital.</p></div>
+            <span class="beneficio-card__icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M8 20h12a2 2 0 0 0 2-2V8M8 8h8M8 12h5"/></svg></span>
+            <h3>Três opções</h3><p>Escolha entre Cartão DM, Loja Física ou Loja Digital.</p><span class="beneficio-card__indice">04</span>
           </article>
         </div>
       </div>
@@ -73,77 +100,61 @@
 
     <section id="como-funciona" class="prova-social">
       <div class="container prova-social__conteudo">
-        <p class="prova-social__subtitulo">COMO FUNCIONA</p>
-        <h2>Do interesse à solicitação em três passos</h2>
+        <div class="prova-social__cabecalho"><div><p class="prova-social__subtitulo">COMO FUNCIONA</p><h2>Seu cartão começa<br>com três passos.</h2></div><p>Uma jornada direta, sem complicação e com todas as informações em um só lugar.</p></div>
         <div class="prova-social__grid">
-          <article><span>01</span><h3>Escolha</h3><p>Selecione o produto que deseja solicitar.</p></article>
-          <article><span>02</span><h3>Preencha</h3><p>Informe seus dados pessoais e seu CEP.</p></article>
-          <article><span>03</span><h3>Acompanhe</h3><p>Receba o status inicial e o número da solicitação.</p></article>
+          <article><span>01 <i aria-hidden="true">↗</i></span><div class="prova-social__linha" aria-hidden="true"></div><h3>Escolha</h3><p>Selecione o cartão que deseja solicitar entre as opções disponíveis.</p></article>
+          <article><span>02 <i aria-hidden="true">↗</i></span><div class="prova-social__linha" aria-hidden="true"></div><h3>Preencha</h3><p>Informe seus dados pessoais e seu CEP para seguir com o pedido.</p></article>
+          <article><span>03 <i aria-hidden="true">✓</i></span><div class="prova-social__linha" aria-hidden="true"></div><h3>Acompanhe</h3><p>Receba o número da solicitação e consulte o status quando quiser.</p></article>
         </div>
       </div>
     </section>
 
     <section id="formulario" class="formulario">
       <div class="container formulario__container">
-        <div class="formulario__cabecalho">
-          <span>COMECE AGORA</span>
-          <h2>Solicite seu cartão</h2>
-          <p>Leva apenas alguns minutos para preencher.</p>
+        <div class="formulario__intro">
+          <div class="formulario__cabecalho"><span>VAMOS COMEÇAR?</span><h2>O seu próximo cartão começa aqui.</h2><p>Escolha sua opção, informe seus dados e acompanhe o andamento da solicitação.</p></div>
+          <div class="formulario__destaque"><span class="formulario__destaque-icone" aria-hidden="true">✦</span><p>Um passo de cada vez.<br><strong>Simples assim.</strong></p></div>
+          <p class="formulario__aviso">A aprovação está sujeita à análise. Este formulário faz parte de um projeto acadêmico.</p>
         </div>
-
-        <div id="stepper" class="stepper" aria-label="Etapas da solicitação"></div>
-        <div id="mensagem-global" class="mensagem-global" hidden></div>
-        <div id="passo-1" class="passo" data-passo="1"></div>
-        <div id="passo-2" class="passo" data-passo="2" hidden></div>
-        <div id="passo-3" class="passo" data-passo="3" hidden></div>
+        <div class="formulario__painel">
+          <div class="formulario__painel-topo"><span>Solicitação de cartão</span><span class="formulario__painel-marca" aria-hidden="true">dm<span>.</span></span></div>
+          <div id="stepper" class="stepper" aria-label="Etapas da solicitação"></div>
+          <div id="mensagem-global" class="mensagem-global" role="alert" hidden></div>
+          <div id="passo-1" class="passo" data-passo="1"></div>
+          <div id="passo-2" class="passo" data-passo="2" hidden></div>
+          <div id="passo-3" class="passo" data-passo="3" hidden></div>
+        </div>
       </div>
     </section>
 
     <section id="consultar-status" class="consulta-status">
       <div class="container consulta-status__container">
-        <div>
-          <span class="consulta-status__etiqueta">ACOMPANHAMENTO</span>
-          <h2>Acompanhe seus pedidos</h2>
-          <p>Informe seu CPF para ver todas as solicitações de cartão e a situação de cada uma.</p>
-        </div>
+        <div class="consulta-status__texto"><span class="consulta-status__etiqueta">ACOMPANHE DE PERTO</span><h2>Seu pedido, sempre ao seu alcance.</h2><p>Já fez sua solicitação? Informe seu CPF para visualizar todos os pedidos e seus status.</p><div class="consulta-status__detalhe"><span aria-hidden="true">↗</span><p>É rápido, fácil e você não precisa preencher tudo de novo.</p></div></div>
         <form id="consulta-status-form" class="consulta-status__form">
-          <div class="campo">
-            <label for="cpf-consulta">Seu CPF</label>
-            <input id="cpf-consulta" name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" required placeholder="000.000.000-00">
-          </div>
-          <button class="btn-primario" type="submit">Buscar solicitações</button>
+          <div class="consulta-status__form-cabecalho"><span class="consulta-status__form-icone" aria-hidden="true">⌕</span><div><strong>Acompanhar pedidos</strong><p>Consulte com seu CPF</p></div></div>
+          
+          <div class="campo"><label for="cpf-consulta">CPF</label><input id="cpf-consulta" name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" required placeholder="000.000.000-00"></div>
+          <button class="btn-primario" type="submit">Buscar solicitações <span aria-hidden="true">→</span></button>
           <div id="consulta-status-resultado" class="consulta-status__resultado" aria-live="polite" hidden></div>
         </form>
       </div>
     </section>
 
     <section id="faq" class="faq">
-      <div class="container">
-        <p class="faq__subtitulo">DÚVIDAS FREQUENTES</p>
-        <h2>Antes de começar</h2>
+      <div class="container faq__container">
+        <div class="faq__intro"><p class="faq__subtitulo">DÚVIDAS FREQUENTES</p><h2>Ficou alguma dúvida?</h2><p>Encontre respostas rápidas para seguir com mais tranquilidade.</p></div>
         <div class="faq__lista">
-          <details>
-            <summary>Quais dados preciso informar?</summary>
-            <p>Nome, CPF, e-mail, telefone e CEP. Para Cartão Loja Física também é necessário escolher uma loja parceira do seu estado.</p>
-          </details>
-          <details>
-            <summary>O que significa “Em análise”?</summary>
-            <p>Significa que a solicitação foi registrada e ainda precisa passar pelas próximas regras de análise do processo.</p>
-          </details>
-          <details>
-            <summary>Como as lojas são exibidas?</summary>
-            <p>O sistema identifica o estado a partir do CEP informado e mostra apenas lojas parceiras cadastradas naquele estado.</p>
-          </details>
+          <details><summary>Quais dados preciso informar? <span aria-hidden="true">+</span></summary><p>Nome, CPF, e-mail, telefone e CEP. Para Cartão Loja Física também é necessário escolher uma loja parceira do seu estado.</p></details>
+          <details><summary>O que significa “Em análise”? <span aria-hidden="true">+</span></summary><p>Significa que a solicitação foi registrada e ainda precisa passar pelas próximas regras de análise do processo.</p></details>
+          <details><summary>Como as lojas são exibidas? <span aria-hidden="true">+</span></summary><p>O sistema identifica o estado a partir do CEP informado e mostra apenas lojas parceiras cadastradas naquele estado.</p></details>
         </div>
       </div>
     </section>
   </main>
 
   <footer id="footer" class="footer">
-    <div class="container footer__conteudo">
-      <div><strong>Equipe Big O</strong><p>API - 2º Semestre ADS</p></div>
-      <p>Protótipo acadêmico. Não é um canal oficial de contratação da DM.</p>
-    </div>
+    <div class="container footer__principal"><div class="footer__marca"><span class="footer__logo" aria-hidden="true">dm<span>.</span></span><p>Toda história merece crédito.</p></div><div class="footer__links"><a href="#beneficios">Benefícios</a><a href="#como-funciona">Como funciona</a><a href="#consultar-status">Acompanhar pedido</a><a href="#faq">Dúvidas</a></div></div>
+    <div class="container footer__base"><div><strong>Equipe Big O</strong><span>API — 2º Semestre ADS</span></div><p>Protótipo acadêmico. Não é um canal oficial de contratação da DM.</p></div>
   </footer>
 
   <script src="js/stepper.js"></script>
