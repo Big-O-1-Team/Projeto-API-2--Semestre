@@ -16,6 +16,14 @@
 </p>
 
 ---
+
+## Vídeo de Execução
+<ul>
+  <li>
+    <a href='https://youtu.be/h8qvw4YDadI?si=cI-S0-noaedncpA6'>Video do funcionamento🎥</a>
+  </li>  
+</ul>
+
 <div align="center">
 
   # LandingPage de Captação e Pré Qualificação de Clientes
