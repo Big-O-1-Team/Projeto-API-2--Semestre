@@ -65,6 +65,6 @@ O formulário exige nome, CPF, e-mail, telefone e CEP válidos no formato espera
 ## Vídeo de Execução
 <ul>
   <li>
-    <a href=''>Video do funcionamento🎥 (Ainda não foi adicionado)</a>
+    <a href='https://youtu.be/h8qvw4YDadI?si=cI-S0-noaedncpA6'>Video do funcionamento🎥)</a>
   </li>  
 </ul>
