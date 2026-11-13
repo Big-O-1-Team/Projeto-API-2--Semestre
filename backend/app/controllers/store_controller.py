@@ -6,6 +6,8 @@ from app.database import get_db
 from app.models.partner_store import PartnerStore
 from app.schemas.partner_store import PartnerStoreResponse, PartnerStoreSearchResponse, StoreEmissionUpdate
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
+from app.models.partner_contributor import PartnerContributor
+from app.schemas.partner import PartnerContributorPublic
 
 router = APIRouter(prefix="/lojas", tags=["Lojas parceiras"])
 
