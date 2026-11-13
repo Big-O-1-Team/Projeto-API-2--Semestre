@@ -9,6 +9,7 @@ from app.schemas.application import ApplicationCreate, ApplicationResponse, Appl
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import modalidade_autorizada
 from app.middleware.rate_limit import verificar_limite_consulta
+from app.models.partner_contributor import PartnerContributor
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
 
@@ -97,6 +98,40 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     if colaborador:
         status_solicitacao = "APROVADO" if tipo_cartao == modalidade_permitida else "REPROVADO"
 
+    contribuidor = None
+
+    if tipo_cartao == "LOJA_FISICA":
+
+    contribuidores_ativos = db.query(PartnerContributor).filter(
+        PartnerContributor.loja_id == loja.id,
+        PartnerContributor.ativo.is_(True)
+    ).count()
+
+    if contribuidores_ativos > 0 and solicitacao.contribuidor_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Selecione um contribuidor para esta loja."
+        )
+
+    if solicitacao.contribuidor_id is not None:
+        contribuidor = db.query(PartnerContributor).filter(
+            PartnerContributor.id == solicitacao.contribuidor_id,
+            PartnerContributor.loja_id == loja.id,
+            PartnerContributor.ativo.is_(True)
+        ).first()
+
+        if not contribuidor:
+            raise HTTPException(
+                status_code=400,
+                detail="Contribuidor inválido ou não pertence a esta loja."
+            )
+
+    elif solicitacao.contribuidor_id is not None:
+    raise HTTPException(
+        status_code=400,
+        detail="Esse cartão não permite atribuição a contribuidor."
+    )
+    
     nova_solicitacao = Application(
         usuario_id=usuario.id,
         tipo_cartao=tipo_cartao,
