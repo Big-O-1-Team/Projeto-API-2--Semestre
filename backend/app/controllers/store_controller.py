@@ -11,6 +11,14 @@ from app.schemas.partner import PartnerContributorPublic
 
 router = APIRouter(prefix="/lojas", tags=["Lojas parceiras"])
 
+@router.get("/parceiras/{loja_id}/contribuidores", response_model=list[PartnerContributorPublic])
+def listar_contribuidores_da_loja(
+    loja_id: int,
+    db: Session = Depends(get_db)):
+    loja = db.query(PartnerStore).filter(PartnerStore.id == loja_id, PartnerStore.ativo.is_(True)).first()
+    if not loja:
+        raise HTTPException(status_code=404, detail="Loja não encontrada.")
+    return db.query(PartnerContributor).filter(PartnerContributor.loja_id == loja_id, PartnerContributor.ativo.is_(True)).order_by(PartnerContributor.nome).all()
 
 @router.get("/parceiras", response_model=PartnerStoreSearchResponse)
 def buscar_lojas_parceiras(cep: str, db: Session = Depends(get_db)):
