@@ -136,6 +136,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         usuario_id=usuario.id,
         tipo_cartao=tipo_cartao,
         loja_id=loja.id if loja else None,
+        contribuidor_id=contribuidor.id if contribuidor else None
         status=status_solicitacao,
     )
 
