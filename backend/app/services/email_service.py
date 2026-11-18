@@ -49,7 +49,7 @@ def enviar_confirmacao(email: str, token: str):
         return False
 
     porta = int(os.getenv("SMTP_PORT", "587"))
-    base = os.getenv("PUBLIC_API_URL", "http://localhost:8000").rstrip("/")
+    base = os.getenv("PUBLIC_API_URL", "").rstrip("/")
     if not (base.startswith("https://") or base.startswith("http://localhost:") or base.startswith("http://127.0.0.1:")):
         raise ValueError("Configure PUBLIC_API_URL com um endereço HTTPS.")
 
