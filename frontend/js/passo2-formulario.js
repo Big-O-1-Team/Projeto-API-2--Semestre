@@ -137,6 +137,56 @@ const PassoDois = {
         </select>
       `;
 
+      const seletorLoja = document.getElementById("loja-id");
+      const filtroLoja = document.createElement("input");
+      filtroLoja.type = "search";
+      filtroLoja.id = "filtro-lojas";
+      filtroLoja.placeholder = "Buscar loja ou cidade";
+      filtroLoja.setAttribute("aria-label", "Filtrar lojas por nome ou cidade");
+      seletorLoja.before(filtroLoja);
+
+      const lojasOrdenadas = [...resposta.lojas].sort((a, b) =>
+        a.cidade.localeCompare(b.cidade, "pt-BR") || a.nome.localeCompare(b.nome, "pt-BR")
+      );
+
+      const atualizarLojas = () => {
+        const termo = filtroLoja.value.trim().toLocaleLowerCase("pt-BR");
+        const filtradas = lojasOrdenadas.filter(loja =>
+          `${loja.nome} ${loja.cidade}`.toLocaleLowerCase("pt-BR").includes(termo)
+        );
+        const selecionada = seletorLoja.value;
+        seletorLoja.replaceChildren(new Option("Selecione uma loja", ""));
+        let grupo = null;
+        let cidadeAtual = "";
+        filtradas.forEach(loja => {
+          if (loja.cidade !== cidadeAtual) {
+            cidadeAtual = loja.cidade;
+            grupo = document.createElement("optgroup");
+            grupo.label = cidadeAtual;
+            seletorLoja.append(grupo);
+          }
+          const opcao = new Option(
+            `${loja.nome}${loja.emite_cartao_credito ? " (emite cartão)" : ""}`,
+            String(loja.id)
+          );
+          grupo.append(opcao);
+        });
+        if (filtradas.some(loja => String(loja.id) === selecionada)) {
+          seletorLoja.value = selecionada;
+        } else if (selecionada) {
+          seletorLoja.dispatchEvent(new Event("change"));
+        }
+        const resumo = document.getElementById("resumo-filtro-lojas");
+        if (resumo) resumo.textContent = `${filtradas.length} loja(s) encontrada(s).`;
+      };
+
+      const resumoFiltro = document.createElement("p");
+      resumoFiltro.id = "resumo-filtro-lojas";
+      resumoFiltro.setAttribute("aria-live", "polite");
+      seletorLoja.after(resumoFiltro);
+      filtroLoja.addEventListener("input", atualizarLojas);
+      atualizarLojas();
+
       document.getElementById("loja-id").addEventListener("change", async (evento) => {
         const loja = resposta.lojas.find(item => String(item.id) === evento.target.value);
 
@@ -180,9 +230,9 @@ const PassoDois = {
 
       container.innerHTML = `
         <div class="campo">
-          <label for="contribuidor-id">Contribuidor responsável</label>
-          <select id="contribuidor-id" required>
-            <option value="">Selecione um contribuidor</option>
+          <label for="contribuidor-id">Atendente responsável (opcional)</label>
+          <select id="contribuidor-id">
+            <option value="">Não sei informar</option>
             ${contribuidores.map(contribuidor => `<option value="${contribuidor.id}">${escaparHtml(contribuidor.nome)}</option>`).join("")}
           </select>
         </div>
