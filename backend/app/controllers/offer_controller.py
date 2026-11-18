@@ -6,6 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -71,8 +72,16 @@ def registrar_interesse(
             email=str(dados.email),
         )
         db.add(interesse)
-        db.commit()
-        db.refresh(interesse)
+        try:
+            db.commit()
+            db.refresh(interesse)
+        except IntegrityError:
+            db.rollback()
+            interesse = db.query(OfferInterest).filter(
+                OfferInterest.solicitacao_id == dados.solicitacao_id
+            ).first()
+            if interesse is None:
+                raise
 
     if interesse.confirmado_em is not None:
         return {"situacao": "CONFIRMADO", "mensagem": "Seu interesse já está confirmado."}
