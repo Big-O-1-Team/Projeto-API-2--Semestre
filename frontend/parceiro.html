@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Parceiro | DM</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      font-family: Arial, sans-serif;
+      background: #f4f5fa;
+      color: #252525;
+    }
+
+    main {
+      max-width: 650px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px #00000012;
+    }
+
+    h1 {
+      color: #2329c5;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    input {
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #2329c5;
+      color: white;
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .secundario {
+      background: #666;
+    }
+
+    .contribuidor {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .contribuidor button {
+      width: auto;
+      min-width: 100px;
+      margin: 0;
+    }
+
+    .desativar {
+      background: #b3261e;
+    }
+
+    .reativar {
+      background: #18864b;
+    }
+
+    .mensagem {
+      margin: 15px 0;
+      color: #b3261e;
+    }
+
+    .sucesso {
+      color: #18864b;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 20px;
+      }
+
+      .contribuidor {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="login">
+      <h1>Área do Parceiro</h1>
+      <p>Acesse sua conta para gerenciar os contribuidores.</p>
+
+      <form id="login-form">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          required
+          autocomplete="username"
+        >
+
+        <label for="senha">Senha</label>
+        <input
+          id="senha"
+          type="password"
+          required
+          autocomplete="current-password"
+        >
+
+        <button type="submit">Entrar</button>
+      </form>
+    </section>
+
+    <section id="painel" hidden>
+      <h1>Meus Contribuidores</h1>
+      <p id="dados-loja"></p>
+
+      <form id="contribuidor-form">
+        <label for="nome-contribuidor">Nome do contribuidor</label>
+        <input
+          id="nome-contribuidor"
+          type="text"
+          minlength="3"
+          maxlength="100"
+          required
+          placeholder="Digite o nome completo"
+        >
+        <button type="submit">Cadastrar contribuidor</button>
+      </form>
+
+      <h2>Contribuidores cadastrados</h2>
+      <div id="lista-contribuidores"></div>
+
+      <button id="sair" class="secundario" type="button">
+        Sair da conta
+      </button>
+    </section>
+
+    <div
+      id="mensagem"
+      class="mensagem"
+      role="alert"
+      aria-live="polite"
+    ></div>
+  </main>
+
+  <script src="js/parceiro.js"></script>
+</body>
+</html>
