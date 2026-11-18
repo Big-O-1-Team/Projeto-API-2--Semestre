@@ -1,15 +1,16 @@
+
 import re
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
 from app.models.partner_store import PartnerStore
+from app.models.partner_contributor import PartnerContributor
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationListResponse, ConsultaCpf
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import modalidade_autorizada
 from app.middleware.rate_limit import verificar_limite_consulta
-from app.models.partner_contributor import PartnerContributor
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
 
@@ -40,13 +41,15 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Tipo de cartão inválido.")
 
     loja = None
+    contribuidor = None
+
     if tipo_cartao == "LOJA_FISICA":
         if not solicitacao.loja_id:
             raise HTTPException(status_code=400, detail="Escolha uma loja parceira.")
 
         loja = db.query(PartnerStore).filter(
             PartnerStore.id == solicitacao.loja_id,
-            PartnerStore.ativo.is_(True),
+            PartnerStore.ativo.is_(True)
         ).first()
 
         if not loja:
@@ -58,13 +61,28 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             raise HTTPException(status_code=400, detail=str(erro)) from erro
 
         if loja.estado != uf_cliente:
-            raise HTTPException(
-                status_code=400,
-                detail="A loja escolhida não pertence ao estado do CEP informado.",
-            )
+            raise HTTPException(status_code=400, detail="A loja escolhida não pertence ao estado do CEP informado.")
 
-    if tipo_cartao != "LOJA_FISICA" and solicitacao.loja_id is not None:
-        raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja física.")
+        contribuidores_ativos = db.query(PartnerContributor).filter(
+            PartnerContributor.loja_id == loja.id,
+            PartnerContributor.ativo.is_(True)
+        ).count()
+
+        if contribuidores_ativos > 0 and solicitacao.contribuidor_id is None:
+            raise HTTPException(status_code=400, detail="Selecione um contribuidor para esta loja.")
+
+        if solicitacao.contribuidor_id is not None:
+            contribuidor = db.query(PartnerContributor).filter(
+                PartnerContributor.id == solicitacao.contribuidor_id,
+                PartnerContributor.loja_id == loja.id,
+                PartnerContributor.ativo.is_(True)
+            ).first()
+
+            if not contribuidor:
+                raise HTTPException(status_code=400, detail="Contribuidor inválido, inativo ou pertencente a outra loja.")
+
+    elif solicitacao.loja_id is not None or solicitacao.contribuidor_id is not None:
+        raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja ou contribuidor.")
 
     usuario_cpf = db.query(User).filter(User.cpf == cpf).first()
     usuario_email = db.query(User).filter(User.email == str(solicitacao.email)).first()
@@ -75,6 +93,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     usuario = usuario_cpf or usuario_email
     modalidade_permitida = modalidade_autorizada(cpf, db)
     colaborador = modalidade_permitida is not None
+
     if usuario:
         usuario.nome = nome
         usuario.email = str(solicitacao.email)
@@ -89,7 +108,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             email=str(solicitacao.email),
             telefone=telefone,
             cep=cep,
-            colaborador_dm=colaborador,
+            colaborador_dm=colaborador
         )
         db.add(usuario)
         db.flush()
@@ -98,46 +117,12 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     if colaborador:
         status_solicitacao = "APROVADO" if tipo_cartao == modalidade_permitida else "REPROVADO"
 
-    contribuidor = None
-
-    if tipo_cartao == "LOJA_FISICA":
-
-    contribuidores_ativos = db.query(PartnerContributor).filter(
-        PartnerContributor.loja_id == loja.id,
-        PartnerContributor.ativo.is_(True)
-    ).count()
-
-    if contribuidores_ativos > 0 and solicitacao.contribuidor_id is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Selecione um contribuidor para esta loja."
-        )
-
-    if solicitacao.contribuidor_id is not None:
-        contribuidor = db.query(PartnerContributor).filter(
-            PartnerContributor.id == solicitacao.contribuidor_id,
-            PartnerContributor.loja_id == loja.id,
-            PartnerContributor.ativo.is_(True)
-        ).first()
-
-        if not contribuidor:
-            raise HTTPException(
-                status_code=400,
-                detail="Contribuidor inválido ou não pertence a esta loja."
-            )
-
-    elif solicitacao.contribuidor_id is not None:
-    raise HTTPException(
-        status_code=400,
-        detail="Esse cartão não permite atribuição a contribuidor."
-    )
-    
     nova_solicitacao = Application(
         usuario_id=usuario.id,
         tipo_cartao=tipo_cartao,
         loja_id=loja.id if loja else None,
-        contribuidor_id=contribuidor.id if contribuidor else None
-        status=status_solicitacao,
+        contribuidor_id=contribuidor.id if contribuidor else None,
+        status=status_solicitacao
     )
 
     db.add(nova_solicitacao)
@@ -150,7 +135,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 def buscar_solicitacao(
     solicitacao_id: int,
     cpf: str = Query(min_length=11, max_length=14),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
     cpf_limpo = somente_numeros(cpf)
     if len(cpf_limpo) != 11:
@@ -162,8 +147,10 @@ def buscar_solicitacao(
         .filter(Application.id == solicitacao_id, User.cpf == cpf_limpo)
         .first()
     )
+
     if not solicitacao:
         raise HTTPException(status_code=404, detail="Solicitação não encontrada para esse CPF.")
+
     return solicitacao
 
 
@@ -172,10 +159,11 @@ def consultar_solicitacoes_por_cpf(
     consulta: ConsultaCpf,
     request: Request,
     pagina: int = Query(default=1, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
     verificar_limite_consulta(request)
     cpf = somente_numeros(consulta.cpf)
+
     if len(cpf) != 11:
         raise HTTPException(status_code=400, detail="Informe um CPF com 11 números.")
 
@@ -184,6 +172,7 @@ def consultar_solicitacoes_por_cpf(
         .join(User, Application.usuario_id == User.id)
         .filter(User.cpf == cpf)
     )
+
     total = pedidos.count()
     solicitacoes = (
         pedidos.order_by(Application.criado_em.desc(), Application.id.desc())
@@ -191,4 +180,5 @@ def consultar_solicitacoes_por_cpf(
         .limit(20)
         .all()
     )
+
     return {"total": total, "solicitacoes": solicitacoes}
