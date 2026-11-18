@@ -34,7 +34,7 @@ services:
       SMTP_USER: '${SMTP_USER:-}'
       SMTP_PASSWORD: '${SMTP_PASSWORD:-}'
       SMTP_FROM: '${SMTP_FROM:-}'
-      PUBLIC_API_URL: '${PUBLIC_API_URL:-http://localhost:8000}'
+      PUBLIC_API_URL: '${PUBLIC_API_URL:-}'
     ports:
       - "8000:8000"
     volumes:
