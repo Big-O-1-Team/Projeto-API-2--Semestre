@@ -63,14 +63,6 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         if loja.estado != uf_cliente:
             raise HTTPException(status_code=400, detail="A loja escolhida não pertence ao estado do CEP informado.")
 
-        contribuidores_ativos = db.query(PartnerContributor).filter(
-            PartnerContributor.loja_id == loja.id,
-            PartnerContributor.ativo.is_(True)
-        ).count()
-
-        if contribuidores_ativos > 0 and solicitacao.contribuidor_id is None:
-            raise HTTPException(status_code=400, detail="Selecione um contribuidor para esta loja.")
-
         if solicitacao.contribuidor_id is not None:
             contribuidor = db.query(PartnerContributor).filter(
                 PartnerContributor.id == solicitacao.contribuidor_id,
