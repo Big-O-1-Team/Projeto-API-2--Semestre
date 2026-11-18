@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 from app.database import Base, engine
 from app.controllers.application_controller import router as application_router
+from app.controllers.offer_controller import router as offer_router
 from app.controllers.card_controller import router as card_router
 from app.controllers.collaborator_controller import router as collaborator_router
 from app.controllers.store_controller import router as store_router
 from app.controllers.user_controller import router as user_router
 from app.middleware.rate_limit import limitar_requisicoes
 from app.models.application import Application
+from app.models.offer_interest import OfferInterest
 from app.models.card import Card
 from app.models.collaborator import Collaborator
 from app.models.partner_store import PartnerStore
@@ -38,6 +40,7 @@ app.include_router(user_router)
 app.include_router(card_router)
 app.include_router(store_router)
 app.include_router(application_router)
+app.include_router(offer_router)
 app.include_router(collaborator_router)
 
 
