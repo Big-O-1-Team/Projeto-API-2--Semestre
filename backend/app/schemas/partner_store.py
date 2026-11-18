@@ -39,7 +39,10 @@ class PartnerStoreCreate(BaseModel):
     @field_validator("nome", "cidade", "endereco")
     @classmethod
     def limpar_texto(cls, valor: str) -> str:
-        return valor.strip()
+        texto = valor.strip()
+        if len(texto) < 2:
+            raise ValueError("Informe um valor válido.")
+        return texto
 
     @field_validator("estado")
     @classmethod
