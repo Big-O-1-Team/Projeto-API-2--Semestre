@@ -10,5 +10,6 @@ class Application(Base):
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
     tipo_cartao = Column(String(30), nullable=False)
     loja_id = Column(Integer, ForeignKey("estabelecimentos_parceiros.id"), nullable=True)
+    contribuidor_id = Column(Integer, ForeignKey("contribuidores_parceiros.id"), nullable=True, index=True)
     status = Column(String(30), nullable=False, default="EM_ANALISE")
     criado_em = Column(DateTime, nullable=False, default=datetime.utcnow)

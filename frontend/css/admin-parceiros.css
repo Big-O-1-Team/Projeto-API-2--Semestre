@@ -1,0 +1,18 @@
+.pagina--admin { grid-template-columns: minmax(0, 1fr) minmax(420px, 570px); align-items: start; }
+.painel-principal--admin { padding: clamp(22px, 4vw, 38px); }
+.etapa-admin { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 25px; }
+.etapa-admin > span { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 11px; background: #eceeff; color: #222dc7; font-size: .83rem; font-weight: 850; }
+.etapa-admin h2 { margin: 0 0 7px; font-size: 1.45rem; }
+.etapa-admin p { margin: 0; color: #64718c; line-height: 1.5; font-size: .86rem; }
+.admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; }
+.admin-grid__completo { grid-column: 1 / -1; }
+.admin-grid select { width: 100%; height: 50px; padding: 0 13px; border: 1px solid var(--borda); border-radius: 10px; background: #fbfcff; color: var(--texto); font: inherit; }
+.admin-grid select:focus-visible { outline: 3px solid #8ca3ff; outline-offset: 2px; }
+.admin-checkbox { display: flex; align-items: center; gap: 10px; padding: 12px 0 20px; line-height: 1.4; font-size: .86rem; font-weight: 600; }
+.admin-checkbox input { width: 18px; height: 18px; accent-color: var(--azul); flex: 0 0 auto; }
+.registro-ok { padding: 15px; background: #eaf8f0; border: 1px solid #bfe8d0; border-radius: 11px; color: #206b49; margin-top: 18px; font-size: .9rem; line-height: 1.5; }
+.acesso-parceiro { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--borda); }
+.acesso-parceiro .campo { margin-bottom: 18px; }
+.painel-principal--admin .mensagem { min-height: 0; }
+@media (max-width: 960px) { .pagina--admin { grid-template-columns: 1fr; } }
+@media (max-width: 540px) { .admin-grid { grid-template-columns: 1fr; } .admin-grid__completo { grid-column: auto; } }

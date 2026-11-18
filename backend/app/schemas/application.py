@@ -12,6 +12,7 @@ class ApplicationCreate(BaseModel):
     cep: str = Field(min_length=8, max_length=8)
     tipo_cartao: Literal["DM", "LOJA_FISICA", "LOJA_DIGITAL"]
     loja_id: int | None = Field(default=None, gt=0)
+    contribuidor_id: int | None = Field(default=None, gt=0)
 
     model_config = ConfigDict(extra="forbid")
 
@@ -33,6 +34,7 @@ class ApplicationResponse(BaseModel):
     loja_id: int | None
     status: str
     criado_em: datetime
+    contribuidor_id: int | None
 
     model_config = ConfigDict(from_attributes=True)
 
