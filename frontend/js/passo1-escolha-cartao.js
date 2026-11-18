@@ -27,10 +27,10 @@ const PassoUm = {
       <p class="passo__descricao">Escolha uma opção para continuar.</p>
       <div class="cartoes-grid">
         ${cartoes.map((cartao) => `
-          <button type="button" class="cartao-opcao" data-tipo-cartao="${cartao.tipo}">
+          <button type="button" class="cartao-opcao" data-tipo-cartao="${escaparHtml(cartao.tipo)}">
             <span class="cartao-opcao__icone">DM</span>
-            <h3>${cartao.nome}</h3>
-            <p>${cartao.descricao || "Selecione para continuar."}</p>
+            <h3>${escaparHtml(cartao.nome)}</h3>
+            <p>${escaparHtml(cartao.descricao || "Selecione para continuar.")}</p>
           </button>
         `).join("")}
       </div>

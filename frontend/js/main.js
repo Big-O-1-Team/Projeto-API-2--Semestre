@@ -19,6 +19,11 @@ async function apiRequest(caminho, opcoes = {}) {
   return dados;
 }
 
+function escaparHtml(valor) {
+  const entidades = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(valor ?? "").replace(/[&<>"']/g, caractere => entidades[caractere]);
+}
+
 function apenasNumeros(valor) {
   return String(valor || "").replace(/\D/g, "");
 }
