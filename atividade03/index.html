@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#192184">
+  <title>DM Card | Solicitação de cartões</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="container barra__conteudo">
+      <a href="#inicio" class="marca" aria-label="DM Card, início">dm<span>.</span><small>cartões e crédito</small></a>
+      <span class="etiqueta-topo">Projeto acadêmico</span>
+    </div>
+  </header>
+
+  <main id="inicio" class="container">
+    <section class="hero">
+      <div class="hero__texto">
+        <span class="sobretitulo"><span class="ponto"></span> SEU PRÓXIMO PASSO COMEÇA AQUI</span>
+        <h1>Mais possibilidades para <em>você.</em></h1>
+        <p>Encontre lojas parceiras, solicite o cartão que combina com você e acompanhe seu pedido em um só lugar.</p>
+        <div class="hero__dados"><span>01 <strong>Encontre</strong></span><span>02 <strong>Solicite</strong></span><span>03 <strong>Acompanhe</strong></span></div>
+      </div>
+      <div class="hero__visual" aria-hidden="true">
+        <div class="orbita orbita--um"></div><div class="orbita orbita--dois"></div>
+        <div class="cartao cartao--atras"><span>dm.</span></div>
+        <div class="cartao cartao--frente"><div class="cartao__topo"><span>dm<span>.</span></span><div class="chip"></div></div><div class="cartao__meio">Seu cartão,<br>suas possibilidades.</div><div class="cartao__baixo"><span>DM CARD</span><span class="simbolo">✦</span></div></div>
+        <div class="hero__flutuante"><span>✓</span><div><strong>Prático e simples</strong><small>Em três etapas</small></div></div>
+      </div>
+    </section>
+
+    <section class="aplicacao" aria-labelledby="titulo-funcoes">
+      <div class="aplicacao__cabecalho"><div><span class="sobretitulo azul">TUDO EM UM SÓ LUGAR</span><h2 id="titulo-funcoes">Como podemos ajudar?</h2></div><p>Escolha uma opção abaixo para começar.</p></div>
+      <div class="abas" role="tablist" aria-label="Funcionalidades">
+        <button type="button" class="aba ativa" data-aba="lojas" role="tab" aria-selected="true" aria-controls="painel-lojas"><span class="aba__icone">⌕</span><span>Encontrar lojas</span></button>
+        <button type="button" class="aba" data-aba="solicitar" role="tab" aria-selected="false" aria-controls="painel-solicitar" tabindex="-1"><span class="aba__icone">▣</span><span>Solicitar cartão</span></button>
+        <button type="button" class="aba" data-aba="acompanhar" role="tab" aria-selected="false" aria-controls="painel-acompanhar" tabindex="-1"><span class="aba__icone">◎</span><span>Acompanhar pedido</span></button>
+      </div>
+      <div class="painel" id="painel-lojas" role="tabpanel">
+        <div class="painel__intro"><div class="bloco-icone">⌕</div><div><h3>Lojas perto de você</h3><p>Digite seu CEP e encontre as lojas parceiras disponíveis no seu estado.</p></div></div>
+        <form id="form-lojas" class="consulta-linha"><div class="campo"><label for="cep-busca">CEP</label><input id="cep-busca" name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" required></div><button class="botao" type="submit">Buscar lojas <span aria-hidden="true">→</span></button></form>
+        <div id="retorno-lojas" class="retorno" role="status" aria-live="polite"></div>
+        <div id="lista-lojas" class="lista-lojas"></div>
+      </div>
+      <div class="painel" id="painel-solicitar" role="tabpanel" hidden>
+        <div class="painel__intro"><div class="bloco-icone">▣</div><div><h3>Solicite seu cartão</h3><p>Preencha os dados e acompanhe o andamento da sua solicitação.</p></div></div>
+        <form id="form-pedido">
+          <div class="grade-formulario">
+            <div class="campo campo--completo"><label for="nome">Nome completo</label><input id="nome" name="nome" required minlength="3" maxlength="100" autocomplete="name" placeholder="Seu nome completo"></div>
+            <div class="campo"><label for="cpf">CPF</label><input id="cpf" name="cpf" inputmode="numeric" maxlength="14" required placeholder="000.000.000-00"></div>
+            <div class="campo"><label for="telefone">Telefone com DDD</label><input id="telefone" name="telefone" inputmode="tel" maxlength="15" required placeholder="(12) 99999-9999"></div>
+            <div class="campo campo--completo"><label for="email">E-mail</label><input id="email" name="email" type="email" required autocomplete="email" placeholder="voce@exemplo.com"></div>
+            <div class="campo"><label for="cep-pedido">CEP</label><input id="cep-pedido" name="cep" inputmode="numeric" maxlength="9" required placeholder="00000-000"></div>
+            <div class="campo"><label for="cartao">Tipo de cartão</label><select id="cartao" name="cartao" required><option value="">Escolha seu cartão</option><option value="DM">Cartão DM</option><option value="LOJA_FISICA">Cartão Loja Física</option><option value="LOJA_DIGITAL">Cartão Loja Digital</option></select></div>
+            <div id="campo-loja" class="campo campo--completo" hidden><label for="loja">Loja parceira</label><div class="loja-seletor"><select id="loja" name="loja_id"><option value="">Consulte as lojas pelo CEP</option></select><button id="buscar-lojas-pedido" class="botao botao--claro" type="button">Buscar</button></div><small id="ajuda-loja">Escolha uma loja do mesmo estado do CEP.</small></div>
+          </div>
+          <button id="enviar-pedido" type="submit" class="botao botao--grande">Enviar solicitação <span aria-hidden="true">→</span></button>
+        </form>
+        <div id="retorno-pedido" class="retorno" role="status" aria-live="polite"></div>
+        <div id="comprovante" class="comprovante" hidden></div>
+      </div>
+      <div class="painel" id="painel-acompanhar" role="tabpanel" hidden>
+        <div class="painel__intro"><div class="bloco-icone">◎</div><div><h3>Acompanhe sua solicitação</h3><p>Consulte os pedidos registrados usando o CPF informado no cadastro.</p></div></div>
+        <form id="form-acompanhar" class="consulta-linha"><div class="campo"><label for="cpf-busca">CPF</label><input id="cpf-busca" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required></div><button type="submit" class="botao">Consultar pedidos <span aria-hidden="true">→</span></button></form>
+        <div id="retorno-consulta" class="retorno" role="status" aria-live="polite"></div>
+        <div id="lista-pedidos" class="lista-pedidos"></div>
+      </div>
+    </section>
+
+    <section class="notas"><div><span class="notas__icone">✓</span><div><strong>Fluxo de demonstração</strong><p>As solicitações são registradas no banco de dados local.</p></div></div><div><span class="notas__icone">✦</span><div><strong>Sem compromisso</strong><p>Este projeto acadêmico não emite cartões nem realiza análises de crédito reais.</p></div></div></section>
+  </main>
+  <footer class="rodape"><div class="container"><strong>dm<span>.</span></strong><span>Projeto acadêmico • Engenharia de Software II</span></div></footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
