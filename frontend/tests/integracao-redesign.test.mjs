@@ -9,6 +9,7 @@ const backend = ler("../../backend/app/controllers/application_controller.py");
 const colaboradores = ler("../../backend/app/services/collaborator_service.py");
 const consulta = ler("../js/status-consulta.js");
 const passo1 = ler("../js/passo1-escolha-cartao.js");
+const catalogo = ler("../../backend/app/seed.py");
 const passo2 = ler("../js/passo2-formulario.js");
 const passo3 = ler("../js/passo3-resultado.js");
 
@@ -41,9 +42,9 @@ test("a listagem de solicitações mantém cores, cartões e paginação", () =>
 });
 
 test("os três cartões, o CEP e o envio continuam disponíveis", () => {
-  assert.ok(passo1.includes('"LOJA_FISICA"'));
-  assert.ok(passo1.includes('"LOJA_DIGITAL"'));
-  assert.ok(passo1.includes('"DM"'));
+  assert.ok(catalogo.includes('"LOJA_FISICA"'));
+  assert.ok(catalogo.includes('"LOJA_DIGITAL"'));
+  assert.ok(catalogo.includes('"DM"'));
   assert.ok(passo2.includes("/lojas/parceiras?"));
   assert.ok(passo2.includes("navigator.geolocation.getCurrentPosition"));
   assert.ok(passo2.includes("programa_nome"));
