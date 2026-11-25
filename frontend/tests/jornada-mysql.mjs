@@ -15,6 +15,9 @@ const contexto = await browser.newContext({
 const pagina = await contexto.newPage();
 const erros = [];
 pagina.on("pageerror", erro => erros.push(erro.message));
+pagina.on("response", async resposta => {
+  if (resposta.url().startsWith(api) && resposta.status() >= 400) console.log(resposta.status(), resposta.url(), await resposta.text().catch(() => ""));
+});
 
 async function formulario(tipo, cpf, email) {
   await pagina.locator('[data-tipo-cartao="' + tipo + '"]').click();
@@ -81,6 +84,11 @@ try {
   await celular.screenshot({ path: "demonstracao/05-mobile.png", fullPage: true });
   await celular.close();
   console.log("Jornada MySQL + navegador aprovada (CEP simulado; SMTP não configurado).");
+} catch (erro) {
+  console.log("Mensagem da interface:", await pagina.locator("#mensagem-global").textContent().catch(() => ""));
+  console.log("Erros JS:", erros);
+  await pagina.screenshot({ path: "demonstracao/falha.png" }).catch(() => {});
+  throw erro;
 } finally {
   await contexto.close();
   await browser.close();
