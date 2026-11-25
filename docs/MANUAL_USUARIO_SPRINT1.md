@@ -1,44 +1,13 @@
-# Manual do Usuário - Sprint 1
+# Manual do usuário
 
-## Iniciar uma solicitação
+1. Escolha Cartão DM, Loja Física ou Loja Digital.
+2. Informe nome, CPF, telefone, e-mail e CEP. Para cartão de loja, pesquise por rede, nome ou cidade e selecione a unidade ou parceiro digital. O cartão digital não tem via física.
+3. Na busca física, use a localização opcional para ordenar por distância aproximada em linha reta. O CEP continua limitando o estado. Se negar a permissão, use a busca normal. Unidades sem coordenadas não exibem distância.
+4. Se houver atendente, selecione-o opcionalmente.
+5. Envie a solicitação. Guarde o código privado e o protocolo; consulte com CPF e código. Não confunda pré-qualificação com emissão.
+6. Se já houver pedido aprovado ou em análise para o mesmo programa, acompanhe o pedido anterior em vez de criar outro.
+7. Se reprovado, pode optar por receber informações sobre outros produtos, confirmando o interesse por e-mail.
 
-Acesse a página inicial e clique em `Solicitar cartão` ou `Começar solicitação`.
+Admin: entre em admin-parceiros.html, informe o token administrativo, cadastre uma rede e seu programa ou selecione um programa existente, cadastre as unidades e informe as coordenadas verificadas quando disponíveis. Atribua uma conta ao responsável. Cada unidade tem um programa ou funciona como independente. A rede pode ter vários programas; compartilhar a rede não implica compartilhar o cartão. O portal parceiro permite gerenciar atendentes da unidade.
 
-## Etapa 1 - Escolher cartão
-
-Escolha uma das opções apresentadas:
-
-- Cartão DM
-- Cartão Loja Física
-- Cartão Loja Digital
-
-Clique em `Continuar`.
-
-## Etapa 2 - Informar dados
-
-Preencha:
-
-- nome completo;
-- CPF;
-- telefone;
-- e-mail;
-- CEP.
-
-### Cartão Loja Física
-
-Clique em `Buscar lojas` depois de preencher o CEP.
-
-O sistema identifica o estado e mostra somente lojas parceiras cadastradas naquele estado.
-
-Escolha uma loja antes de enviar a solicitação.
-
-## Etapa 3 - Resultado
-
-Após o envio, o sistema mostra:
-
-- número da solicitação;
-- cartão escolhido;
-- status inicial;
-- loja escolhida, quando aplicável.
-
-Na Sprint 1, as solicitações seguem inicialmente com o status `Em análise`.
+Ambiente acadêmico: redes, lojas e bases de aprovação de demonstração são fictícias; as distâncias dos exemplos também são ilustrativas.

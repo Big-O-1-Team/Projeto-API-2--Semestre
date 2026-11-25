@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models.partner_store import PartnerStore
 from app.models.card_program import PartnerNetwork, CardProgram
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from app.schemas.partner_store import PartnerStoreResponse, PartnerStoreSearchResponse, StoreEmissionUpdate, PartnerStoreCreate, NetworkCreate, ProgramCreate, StoreProgramUpdate
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.models.partner_contributor import PartnerContributor
@@ -151,7 +152,11 @@ def cadastrar_rede(dados: NetworkCreate, x_admin_token: str = Header(default="")
         raise HTTPException(409, "Rede já cadastrada.")
     rede = PartnerNetwork(nome=nome)
     db.add(rede)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as erro:
+        db.rollback()
+        raise HTTPException(409, "Rede já cadastrada.") from erro
     db.refresh(rede)
     return {"id": rede.id, "nome": rede.nome}
 
@@ -167,7 +172,11 @@ def cadastrar_programa(dados: ProgramCreate, x_admin_token: str = Header(default
         raise HTTPException(409, "Programa já cadastrado.")
     programa = CardProgram(rede_id=rede.id, nome=nome, modalidade=dados.modalidade)
     db.add(programa)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as erro:
+        db.rollback()
+        raise HTTPException(409, "Programa já cadastrado.") from erro
     db.refresh(programa)
     return {"id": programa.id, "nome": programa.nome, "rede_id": rede.id, "modalidade": programa.modalidade}
 

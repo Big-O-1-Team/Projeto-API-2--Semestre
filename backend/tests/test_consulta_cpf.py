@@ -1,4 +1,5 @@
 from datetime import datetime
+import hashlib
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -23,7 +24,7 @@ def test_listar_solicitacoes_do_cpf():
         usuario = User(nome="Pessoa Teste", cpf="12345678901", email="teste@example.com", telefone="12999999999", cep="12210000", colaborador_dm=False)
         db.add(usuario)
         db.flush()
-        db.add(Application(usuario_id=usuario.id, tipo_cartao="DM", status="EM_ANALISE", criado_em=datetime(2026, 10, 28)))
+        db.add(Application(usuario_id=usuario.id, tipo_cartao="DM", status="EM_ANALISE", criado_em=datetime(2026, 10, 28), codigo_consulta_hash=hashlib.sha256(b"codigo-privado-teste-123456789").hexdigest()))
         db.add(Application(usuario_id=usuario.id, tipo_cartao="LOJA_DIGITAL", status="APROVADO", criado_em=datetime(2026, 10, 29)))
         db.commit()
 
@@ -37,12 +38,13 @@ def test_listar_solicitacoes_do_cpf():
     app.dependency_overrides[get_db] = usar_banco
     rate_limit.consultas_por_ip.clear()
     with TestClient(app) as client:
-        res = client.post("/solicitacoes/consultar", json={"cpf": "123.456.789-01"})
+        assert client.post("/solicitacoes/consultar", json={"cpf": "123.456.789-01"}).status_code == 422
+        res = client.post("/solicitacoes/consultar", json={"cpf": "123.456.789-01", "codigo": "codigo-privado-teste-123456789"})
         assert res.status_code == 200
-        assert res.json()["total"] == 2
-        assert len(res.json()["solicitacoes"]) == 2
+        assert res.json()["total"] == 1
+        assert len(res.json()["solicitacoes"]) == 1
         assert set(res.json()["solicitacoes"][0]) == {"id", "tipo_cartao", "status", "criado_em"}
-        vazio = client.post("/solicitacoes/consultar", json={"cpf": "00000000000"})
+        vazio = client.post("/solicitacoes/consultar", json={"cpf": "00000000000", "codigo": "codigo-privado-teste-123456789"})
         assert vazio.status_code == 200
         assert vazio.json()["total"] == 0
     rate_limit.consultas_por_ip.clear()

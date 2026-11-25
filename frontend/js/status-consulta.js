@@ -129,6 +129,11 @@ function iniciarConsultaStatus() {
     }
   }
 
+  document.getElementById("codigo-consulta").addEventListener("input", () => {
+    resultado.hidden = true;
+    resultado.replaceChildren();
+  });
+
   campoCpf.addEventListener("input", () => {
     const numeros = apenasNumeros(campoCpf.value).slice(0, 11);
     campoCpf.value = numeros

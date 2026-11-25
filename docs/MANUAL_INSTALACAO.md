@@ -1,51 +1,28 @@
-# Manual de Instalação
+# Instalação
 
-## Requisitos
-
-- Git
-- Docker
-- Docker Compose
-
-## Instalação
-
-Clone o repositório e entre na pasta do projeto.
+Requisitos: Git, Docker e Docker Compose.
 
 ```bash
-git clone URL_DO_REPOSITORIO
-cd Projeto-API-2--Semestre-main
-```
-
-Suba os três serviços:
-
-```bash
+git clone https://github.com/Big-O-1-Team/Projeto-API-2--Semestre.git
+cd Projeto-API-2--Semestre
+git switch feat/integracao-dm-redes-localizacao
+cp .env.example .env
 docker compose up --build
 ```
 
-Aguarde o MySQL ficar saudável e o backend iniciar.
+Antes de iniciar, configure AUTH_SECRET e ADMIN_TOKEN com valores aleatórios de pelo menos 32 caracteres. Não publique o .env. Se a porta 3306 estiver ocupada, remova o mapeamento de porta do serviço mysql (o backend usa a rede interna).
 
-## Acessos
+Aplicação: http://localhost:5173  
+API: http://localhost:8000/docs  
+Admin: http://localhost:5173/admin-parceiros.html  
+Parceiro: http://localhost:5173/parceiro.html
 
-- Aplicação: `http://localhost:5173`
-- API: `http://localhost:8000`
-- Swagger: `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/health`
+Para testar aprovação fictícia de não colaboradores, configure DEMO_PRE_QUALIFICACAO=1 e PRE_QUALIFICADOS_FICTICIOS como JSON com CPF de teste e lista de modalidades. Por padrão essa aprovação está desativada. Não use dados reais.
 
-## Variáveis de ambiente
-
-O projeto possui valores padrão para desenvolvimento local. Caso queira alterar os dados do MySQL, copie `.env.example` para `.env` e edite os valores.
-
-```bash
-cp .env.example .env
-```
-
-## Encerrar
+SMTP exige SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM e PUBLIC_API_URL acessível. Sem SMTP, o sistema não afirma que enviou e-mail. Localização exige HTTPS ou localhost e consentimento do navegador. O ViaCEP precisa estar acessível para validar CEP de lojas físicas.
 
 ```bash
 docker compose down
 ```
 
-Para remover também os dados armazenados no volume do MySQL:
-
-```bash
-docker compose down -v
-```
+Não use down -v em banco com dados a preservar. Faça backup antes da migração de uma instalação existente. Solicitações legadas não têm código privado; precisam de recuperação administrativa segura antes de uso público.

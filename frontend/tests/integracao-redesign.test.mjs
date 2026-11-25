@@ -21,11 +21,12 @@ test("navegação e botões do novo design permanecem conectados", () => {
   }
 });
 
-test("consulta solicita apenas CPF", () => {
+test("consulta exige CPF e código privado", () => {
   assert.ok(html.includes('id="cpf-consulta"'));
   assert.ok(html.includes('id="consulta-status-form"'));
   assert.ok(html.includes('id="consulta-status-resultado"'));
-  assert.ok(!html.includes('id="numero-solicitacao"'));
+  assert.ok(html.includes('id="codigo-consulta"'));
+  assert.ok(consulta.includes("JSON.stringify({ cpf, codigo })"));
   assert.ok(consulta.includes("/solicitacoes/consultar"));
   assert.ok(consulta.includes('method: "POST"'));
 });
@@ -43,7 +44,9 @@ test("os três cartões, o CEP e o envio continuam disponíveis", () => {
   assert.ok(passo1.includes('"LOJA_FISICA"'));
   assert.ok(passo1.includes('"LOJA_DIGITAL"'));
   assert.ok(passo1.includes('"DM"'));
-  assert.ok(passo2.includes("/lojas/parceiras?cep="));
+  assert.ok(passo2.includes("/lojas/parceiras?"));
+  assert.ok(passo2.includes("navigator.geolocation.getCurrentPosition"));
+  assert.ok(passo2.includes("programa_nome"));
   assert.ok(passo2.includes('apiRequest("/solicitacoes/"'));
   assert.ok(passo3.includes('id="consultar-solicitacao"'));
   assert.ok(passo3.includes('"consulta-status-form").requestSubmit()'));

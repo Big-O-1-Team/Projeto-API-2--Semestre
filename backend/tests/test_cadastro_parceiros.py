@@ -20,6 +20,7 @@ def cliente(monkeypatch):
     monkeypatch.setenv("AUTH_SECRET", "segredo-de-autenticacao-apenas-para-testes-12345")
     monkeypatch.setenv("COLABORADORES_DM", "{}")
     monkeypatch.setattr(application_controller, "obter_uf_por_cep", lambda cep: "SP")
+    monkeypatch.setattr(store_controller, "obter_uf_por_cep", lambda cep: "SP")
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -115,7 +116,7 @@ def test_contribuidores_ficam_isolados_por_loja_e_sao_opcionais(cliente):
 
     com_atendente = cliente.post(
         "/solicitacoes/",
-        json={**payload, "contribuidor_id": id_contribuidor},
+        json={**payload, "cpf": "52998224725", "email": "outro@example.com", "contribuidor_id": id_contribuidor},
     )
     assert com_atendente.status_code == 201, com_atendente.text
     assert com_atendente.json()["contribuidor_id"] == id_contribuidor
@@ -125,3 +126,47 @@ def test_contribuidores_ficam_isolados_por_loja_e_sao_opcionais(cliente):
         json={**payload, "loja_id": segunda, "contribuidor_id": id_contribuidor},
     )
     assert loja_errada.status_code == 400
+
+
+def test_rede_distancia_paginacao_e_bloqueio(cliente):
+    admin = {"x-admin-token": "senha-de-administrador-apenas-para-testes-123456789"}
+    rede = cliente.post("/lojas/redes", headers=admin, json={"nome": "Rede Teste"}).json()
+    programa = cliente.post("/lojas/programas", headers=admin, json={"rede_id": rede["id"], "nome": "Cartão Rede", "modalidade": "LOJA_FISICA"}).json()
+    ids = []
+    for nome, latitude in [("Unidade distante", -23.4), ("Unidade próxima", -23.18)]:
+        resposta = cliente.post("/lojas/parceiras", headers=admin, json={"nome": nome, "estado": "SP", "cidade": "São José dos Campos", "endereco": "Rua Exemplo, 1", "cep": "12210000", "programa_id": programa["id"], "latitude": latitude, "longitude": -45.88})
+        assert resposta.status_code == 201, resposta.text
+        ids.append(resposta.json()["id"])
+    busca = cliente.get("/lojas/parceiras", params={"cep": "12210000", "latitude": -23.18, "longitude": -45.88, "limite": 1})
+    assert busca.status_code == 200, busca.text
+    assert busca.json()["total"] == 2
+    assert busca.json()["lojas"][0]["id"] == ids[1]
+    assert busca.json()["lojas"][0]["distancia_km"] == 0
+    payload = {"nome": "Pessoa Teste", "cpf": "98765432100", "email": "teste@example.com", "telefone": "12999998888", "cep": "12210000", "tipo_cartao": "LOJA_FISICA", "loja_id": ids[0]}
+    primeira = cliente.post("/solicitacoes/", json=payload)
+    assert primeira.status_code == 201, primeira.text
+    assert primeira.json()["programa_id"] == programa["id"]
+    assert cliente.post("/solicitacoes/", json={**payload, "loja_id": ids[1]}).status_code == 409
+    assert cliente.post("/solicitacoes/", json={**payload, "cpf": "52998224725"}).status_code == 409
+    assert cliente.get("/lojas/parceiras", params={"cep": "12210000", "latitude": 1}).status_code == 400
+
+
+def test_pre_qualificacao_ficticia(cliente, monkeypatch):
+    monkeypatch.setenv("DEMO_PRE_QUALIFICACAO", "1")
+    monkeypatch.setenv("PRE_QUALIFICADOS_FICTICIOS", '{"98765432100":["DM"]}')
+    payload = {"nome": "Pessoa Teste", "cpf": "98765432100", "email": "teste@example.com", "telefone": "12999998888", "cep": "12210000", "tipo_cartao": "DM"}
+    resposta = cliente.post("/solicitacoes/", json=payload)
+    assert resposta.status_code == 201, resposta.text
+    assert resposta.json()["status"] == "APROVADO"
+    assert cliente.post("/solicitacoes/", json={**payload, "cpf": "11111111111"}).status_code == 400
+
+
+def test_programa_digital_sem_restricao_de_uf(cliente):
+    admin = {"x-admin-token": "senha-de-administrador-apenas-para-testes-123456789"}
+    rede = cliente.post("/lojas/redes", headers=admin, json={"nome": "Rede Digital"}).json()
+    programa = cliente.post("/lojas/programas", headers=admin, json={"rede_id": rede["id"], "nome": "Cartão Digital", "modalidade": "LOJA_DIGITAL"}).json()
+    loja = cliente.post("/lojas/parceiras", headers=admin, json={"nome": "Canal Digital", "estado": "SP", "cidade": "São José dos Campos", "endereco": "Canal digital", "cep": "12210000", "programa_id": programa["id"]}).json()
+    busca = cliente.get("/lojas/parceiras", params={"cep": "20040020", "modalidade": "LOJA_DIGITAL"})
+    assert busca.json()["lojas"][0]["id"] == loja["id"]
+    payload = {"nome": "Pessoa Teste", "cpf": "98765432100", "email": "teste@example.com", "telefone": "12999998888", "cep": "20040020", "tipo_cartao": "LOJA_DIGITAL", "loja_id": loja["id"]}
+    assert cliente.post("/solicitacoes/", json=payload).status_code == 201

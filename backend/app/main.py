@@ -84,7 +84,10 @@ if not indice_existente:
 def adicionar_coluna(tabela, coluna, definicao):
     if coluna not in {c["name"] for c in inspect(engine).get_columns(tabela)}:
         with engine.begin() as conexao:
-            conexao.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}"))
+            if engine.dialect.name == "mysql" and coluna == "programa_id":
+                conexao.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {coluna} INTEGER NULL"))
+            else:
+                conexao.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}"))
 
 
 for tabela, coluna, definicao in [
@@ -96,6 +99,12 @@ for tabela, coluna, definicao in [
     ("solicitacoes", "codigo_consulta_hash", "VARCHAR(64) NULL"),
 ]:
     adicionar_coluna(tabela, coluna, definicao)
+
+if engine.dialect.name == "mysql":
+    for tabela in ("estabelecimentos_parceiros", "solicitacoes"):
+        if not any(fk.get("constrained_columns") == ["programa_id"] for fk in inspect(engine).get_foreign_keys(tabela)):
+            with engine.begin() as conexao:
+                conexao.execute(text(f"ALTER TABLE {tabela} ADD CONSTRAINT fk_{tabela}_programa FOREIGN KEY (programa_id) REFERENCES programas_cartao(id)"))
 
 for coluna in ("chave_ativa", "codigo_consulta_hash"):
     indices = inspect(engine).get_indexes("solicitacoes") + inspect(engine).get_unique_constraints("solicitacoes")

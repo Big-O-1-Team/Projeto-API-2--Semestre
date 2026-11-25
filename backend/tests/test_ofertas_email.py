@@ -16,7 +16,7 @@ from app.services.email_service import validar_token_confirmacao
 
 @pytest.fixture
 def ambiente(monkeypatch):
-    monkeypatch.setenv("COLABORADORES_DM", '{"12345678901":"senha-de-teste"}')
+    monkeypatch.setenv("COLABORADORES_DM", '{"12345678909":"senha-de-teste"}')
     monkeypatch.setenv("AUTH_SECRET", "segredo-para-testar-confirmacao-de-ofertas-123456789")
     monkeypatch.setattr(offer_controller, "verificar_limite_consulta", lambda request: None)
     engine = create_engine(
@@ -40,7 +40,7 @@ def ambiente(monkeypatch):
     engine.dispose()
 
 
-def solicitar(cliente, cpf="12345678901", tipo="LOJA_DIGITAL"):
+def solicitar(cliente, cpf="12345678909", tipo="LOJA_DIGITAL"):
     resposta = cliente.post("/solicitacoes/", json={
         "nome": "Pessoa de Teste",
         "cpf": cpf,
@@ -53,9 +53,10 @@ def solicitar(cliente, cpf="12345678901", tipo="LOJA_DIGITAL"):
     return resposta.json()
 
 
-def interesse(cliente, solicitacao_id, email="pessoa@example.com", cpf="12345678901", aceitar=True):
+def interesse(cliente, pedido, email="pessoa@example.com", cpf="12345678909", aceitar=True):
     return cliente.post("/ofertas/interesse", json={
-        "solicitacao_id": solicitacao_id,
+        "solicitacao_id": pedido["id"],
+        "codigo": pedido["codigo_consulta"],
         "cpf": cpf,
         "email": email,
         "aceitar": aceitar,
@@ -73,20 +74,20 @@ def test_reprovado_pode_pedir_confirmacao_e_nao_recebe_email_duplicado(ambiente,
         return True
 
     monkeypatch.setattr(offer_controller, "enviar_confirmacao", enviar)
-    resposta = interesse(cliente, pedido["id"])
+    resposta = interesse(cliente, pedido)
     assert resposta.status_code == 200, resposta.text
     assert resposta.json()["situacao"] == "AGUARDANDO_CONFIRMACAO"
     assert len(enviados) == 1
-    assert interesse(cliente, pedido["id"]).json()["situacao"] == "AGUARDANDO_CONFIRMACAO"
+    assert interesse(cliente, pedido).json()["situacao"] == "AGUARDANDO_CONFIRMACAO"
     assert len(enviados) == 1
-    assert interesse(cliente, pedido["id"], aceitar=False).status_code == 400
-    assert interesse(cliente, pedido["id"], cpf="98765432100").status_code == 404
-    assert interesse(cliente, pedido["id"], email="outro@example.com").status_code == 404
+    assert interesse(cliente, pedido, aceitar=False).status_code == 400
+    assert interesse(cliente, pedido, cpf="98765432100").status_code == 404
+    assert interesse(cliente, pedido, email="outro@example.com").status_code == 404
 
     confirmacao = cliente.get("/ofertas/confirmar", params={"token": enviados[0][1]})
     assert confirmacao.status_code == 200
     assert "Interesse confirmado" in confirmacao.text
-    assert interesse(cliente, pedido["id"]).json()["situacao"] == "CONFIRMADO"
+    assert interesse(cliente, pedido).json()["situacao"] == "CONFIRMADO"
     assert len(enviados) == 1
 
     with sessao() as db:
@@ -99,7 +100,7 @@ def test_nao_registrar_interesse_de_cliente_que_nao_foi_reprovado(ambiente):
     cliente, _ = ambiente
     pedido = solicitar(cliente, cpf="98765432100", tipo="DM")
     assert pedido["status"] == "EM_ANALISE"
-    assert interesse(cliente, pedido["id"], cpf="98765432100").status_code == 404
+    assert interesse(cliente, pedido, cpf="98765432100").status_code == 404
     assert cliente.get("/ofertas/confirmar", params={"token": "token-que-nao-e-valido-12345"}).status_code == 400
 
 
@@ -107,7 +108,7 @@ def test_sem_smtp_nao_simula_email_enviado(ambiente, monkeypatch):
     cliente, sessao = ambiente
     pedido = solicitar(cliente)
     monkeypatch.setattr(offer_controller, "enviar_confirmacao", lambda email, token: False)
-    resposta = interesse(cliente, pedido["id"])
+    resposta = interesse(cliente, pedido)
     assert resposta.status_code == 200
     assert resposta.json()["situacao"] == "PENDENTE_ENVIO"
     with sessao() as db:
