@@ -65,7 +65,10 @@ def test_quatro_colaboradores_aprovados_no_dm(ambiente):
 
 def test_colaborador_recusado_em_loja(ambiente):
     cliente, sessao = ambiente
-    digital = solicitar(cliente, "32376226643", "LOJA_DIGITAL")
+    with sessao() as db:
+        loja_digital = next(loja for loja in db.query(PartnerStore).all() if loja.modalidade == "LOJA_DIGITAL")
+        digital_id = loja_digital.id
+    digital = solicitar(cliente, "32376226643", "LOJA_DIGITAL", digital_id)
     assert digital.status_code == 201, digital.text
     assert digital.json()["status"] == "REPROVADO"
 

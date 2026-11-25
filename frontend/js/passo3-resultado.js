@@ -23,6 +23,7 @@ const PassoTres = {
       '<div><span>Cartão</span><strong>', escaparHtml(AppState.nomeCartao || solicitacao.tipo_cartao), '</strong></div>',
       '<div><span>Status</span><strong>', escaparHtml(formatarStatus(solicitacao.status)), '</strong></div>',
       AppState.loja ? '<div><span>Loja</span><strong>' + escaparHtml(AppState.loja.nome) + '</strong></div>' : '',
+      AppState.loja?.programa_nome ? '<div><span>Programa</span><strong>' + escaparHtml(AppState.loja.programa_nome) + '</strong></div>' : '',
       '<div><span>Código privado de acompanhamento</span><strong style="overflow-wrap:anywhere">', escaparHtml(solicitacao.codigo_consulta), '</strong></div>',
       '</div>',
       '<p>Guarde o código para consultar seu pedido. Não compartilhe.</p>',

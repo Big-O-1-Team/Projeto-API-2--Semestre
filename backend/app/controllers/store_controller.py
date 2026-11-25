@@ -2,7 +2,7 @@ import hmac
 import os
 import math
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload, joinedload
 from app.database import get_db
 from app.models.partner_store import PartnerStore
 from app.models.card_program import PartnerNetwork, CardProgram, programa_unidades
@@ -55,6 +55,7 @@ def pesquisar_lojas(cep, modalidade, latitude, longitude, busca, pagina, limite,
     cep_limpo = limpar_cep(cep)
     uf = ""
     consulta = db.query(PartnerStore, CardProgram).outerjoin(programa_unidades, programa_unidades.c.loja_id == PartnerStore.id).outerjoin(CardProgram, CardProgram.id == programa_unidades.c.programa_id).outerjoin(PartnerNetwork, PartnerNetwork.id == CardProgram.rede_id)
+    consulta = consulta.options(selectinload(PartnerStore.programas).joinedload(CardProgram.rede), joinedload(CardProgram.rede))
     consulta = consulta.filter(PartnerStore.ativo.is_(True))
     programa_ativo = (CardProgram.ativo.is_(True) & PartnerNetwork.ativo.is_(True))
     if modalidade == "LOJA_FISICA":

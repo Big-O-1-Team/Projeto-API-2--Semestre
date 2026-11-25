@@ -57,6 +57,9 @@ try {
   assert.equal(duplicada.status, 409);
   const fora = await fetch(api + "/solicitacoes/", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({...pedido, cep: "20040020"}) });
   assert.equal(fora.status, 400);
+  const concorrente = {...pedido, cpf: "52998224725", email: "concorrente@example.com"};
+  const simultaneas = await Promise.all([unidade.id, outra.id].map(loja_id => fetch(api + "/solicitacoes/", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({...concorrente, loja_id})})));
+  assert.deepEqual(simultaneas.map(r => r.status).sort(), [201, 409]);
   await pagina.locator("#nova-solicitacao").click();
   await formulario("LOJA_DIGITAL", "32376226643", "teste-dm@example.com");
   await pagina.locator("#buscar-lojas").click();

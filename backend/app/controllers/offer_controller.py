@@ -86,6 +86,7 @@ def registrar_interesse(
             if interesse is None:
                 raise
 
+    interesse = db.query(OfferInterest).filter(OfferInterest.solicitacao_id == dados.solicitacao_id).with_for_update().populate_existing().first()
     if interesse.confirmado_em is not None:
         return {"situacao": "CONFIRMADO", "mensagem": "Seu interesse já está confirmado."}
     if interesse.enviado_em is not None:

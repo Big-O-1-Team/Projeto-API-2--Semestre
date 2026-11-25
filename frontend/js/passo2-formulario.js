@@ -165,7 +165,7 @@ const PassoDois = {
       if (pedido !== this.buscaAtual || !box.isConnected || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
       box.replaceChildren();
       const resumo = document.createElement("p");
-      resumo.textContent = resposta.total + " unidade(s) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");
+      resumo.textContent = resposta.total + " opção(ões) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");
       box.append(resumo);
       if (!resposta.lojas.length) return;
       const seletor = document.createElement("select");
@@ -186,7 +186,7 @@ const PassoDois = {
         const local = modalidade === "LOJA_DIGITAL" ? "" : " — " + loja.cidade + ", " + loja.endereco;
         const opcao = new Option(loja.nome + local + distancia, String(loja.id) + ":" + (loja.programa_id || ""));
         if (this.localizacao) {
-          opcao.textContent = (loja.rede_nome ? loja.rede_nome + " — " : "") + opcao.textContent;
+          opcao.textContent = (loja.rede_nome ? loja.rede_nome + " — " + loja.programa_nome + " — " : "") + opcao.textContent;
           seletor.append(opcao);
         } else grupos.get(nome).append(opcao);
       }

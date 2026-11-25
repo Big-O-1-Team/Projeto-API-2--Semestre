@@ -10,6 +10,7 @@ from app.database import Base, get_db
 from app.models.application import Application
 from app.models.offer_interest import OfferInterest
 from app.models.partner_store import PartnerStore
+from app.models.card_program import PartnerNetwork, CardProgram
 from app.models.user import User
 from app.services.email_service import validar_token_confirmacao
 
@@ -27,6 +28,13 @@ def ambiente(monkeypatch):
     )
     Base.metadata.create_all(engine)
     sessao = sessionmaker(bind=engine)
+    with sessao() as db:
+        rede = PartnerNetwork(nome="Rede Digital Teste")
+        programa = CardProgram(nome="Cartão Digital Teste", rede=rede, modalidade="LOJA_DIGITAL")
+        loja = PartnerStore(nome="Canal Digital Teste", estado="SP", cidade="SJC", endereco="Digital", cep="12210000")
+        loja.programas.append(programa)
+        db.add(loja)
+        db.commit()
     app = FastAPI()
     app.include_router(application_controller.router)
     app.include_router(offer_controller.router)
@@ -49,6 +57,7 @@ def solicitar(cliente, cpf="12345678909", tipo="LOJA_DIGITAL"):
         "telefone": "12999998888",
         "cep": "12210000",
         "tipo_cartao": tipo,
+        "loja_id": 1 if tipo == "LOJA_DIGITAL" else None,
     })
     assert resposta.status_code == 201, resposta.text
     return resposta.json()

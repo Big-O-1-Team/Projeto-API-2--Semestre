@@ -2,7 +2,7 @@
 import re
 import hashlib
 import secrets
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy import or_
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ from app.schemas.application import ApplicationCreate, ApplicationResponse, Appl
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import modalidade_autorizada
 from app.services.qualificacao_service import cpf_valido, pre_qualificado
+from app.controllers.store_controller import validar_administrador
 from app.middleware.rate_limit import verificar_limite_consulta
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
@@ -55,7 +56,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     contribuidor = None
     programa = None
 
-    if tipo_cartao == "LOJA_FISICA" or (tipo_cartao == "LOJA_DIGITAL" and solicitacao.loja_id):
+    if tipo_cartao in ("LOJA_FISICA", "LOJA_DIGITAL"):
         if not solicitacao.loja_id:
             raise HTTPException(status_code=400, detail="Escolha uma loja parceira.")
 
@@ -147,6 +148,11 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     except IntegrityError as erro:
         db.rollback()
         raise HTTPException(409, "Cadastro ou solicitação já existente.") from erro
+    except OperationalError as erro:
+        db.rollback()
+        if getattr(erro.orig, "args", [None])[0] in (1205, 1213):
+            raise HTTPException(409, "Solicitação concorrente. Consulte o pedido ou tente novamente.") from erro
+        raise
 
 
 @router.get("/{solicitacao_id}", response_model=ApplicationResponse)
@@ -163,3 +169,15 @@ def consultar_solicitacoes_por_cpf(consulta: ConsultaCpf, request: Request, pagi
     verificar_limite_consulta(request)
     pedido = db.query(Application).join(User).filter(User.cpf == somente_numeros(consulta.cpf), Application.codigo_consulta_hash == hashlib.sha256(consulta.codigo.encode()).hexdigest()).first()
     return {"total": 1 if pedido else 0, "solicitacoes": [pedido] if pedido and pagina == 1 else []}
+
+
+@router.post("/{solicitacao_id}/codigo")
+def recuperar_codigo(solicitacao_id: int, x_admin_token: str = Header(default=""), db: Session = Depends(get_db)):
+    validar_administrador(x_admin_token)
+    pedido = db.query(Application).filter(Application.id == solicitacao_id).with_for_update().first()
+    if not pedido:
+        raise HTTPException(404, "Solicitação não encontrada.")
+    codigo = secrets.token_urlsafe(24)
+    pedido.codigo_consulta_hash = hashlib.sha256(codigo.encode()).hexdigest()
+    db.commit()
+    return {"codigo_consulta": codigo}

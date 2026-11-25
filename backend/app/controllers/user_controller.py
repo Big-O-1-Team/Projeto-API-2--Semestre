@@ -16,7 +16,8 @@ def somente_numeros(valor: str) -> str:
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def criar_usuario(usuario: UserCreate, db: Session = Depends(get_db)):
+def criar_usuario(usuario: UserCreate, x_admin_token: str = Header(default=""), db: Session = Depends(get_db)):
+    validar_administrador(x_admin_token)
     cpf = somente_numeros(usuario.cpf)
     telefone = somente_numeros(usuario.telefone)
     cep = somente_numeros(usuario.cep)

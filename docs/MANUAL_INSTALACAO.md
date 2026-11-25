@@ -25,4 +25,4 @@ SMTP exige SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM e PUBLIC_AP
 docker compose down
 ```
 
-Não use down -v em banco com dados a preservar. Faça backup antes da migração de uma instalação existente. Solicitações legadas não têm código privado; precisam de recuperação administrativa segura antes de uso público.
+Não use down -v em banco com dados a preservar. Faça backup antes da migração de uma instalação existente. Solicitações legadas não têm código privado. Após verificar a identidade do titular por canal seguro, um administrador pode gerar um novo código em POST /solicitacoes/{id}/codigo (invalida o anterior).
