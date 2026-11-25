@@ -151,12 +151,17 @@ const PassoDois = {
     AppState.contribuidoresCarregados = false;
     box.textContent = "Buscando lojas...";
     try {
-      const params = new URLSearchParams({ cep, modalidade, pagina, limite: 50, busca: document.getElementById("filtro-parceiros").value });
+      const params = { cep, modalidade, pagina, limite: 50, busca: document.getElementById("filtro-parceiros").value };
+      let resposta;
       if (this.localizacao && modalidade === "LOJA_FISICA") {
-        params.set("latitude", this.localizacao.latitude);
-        params.set("longitude", this.localizacao.longitude);
+        resposta = await apiRequest("/lojas/buscar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...params, ...this.localizacao })
+        });
+      } else {
+        resposta = await apiRequest("/lojas/parceiras?" + new URLSearchParams(params));
       }
-      const resposta = await apiRequest("/lojas/parceiras?" + params);
       if (pedido !== this.buscaAtual || !box.isConnected || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
       box.replaceChildren();
       const resumo = document.createElement("p");

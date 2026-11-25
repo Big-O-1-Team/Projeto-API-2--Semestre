@@ -34,3 +34,58 @@ jobs:
           for arquivo in frontend/js/*.js; do
             node --check "$arquivo"
           done
+
+  integracao-mysql:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: teste_ci
+          MYSQL_DATABASE: dmcard_ci
+          MYSQL_USER: dmcard_ci
+          MYSQL_PASSWORD: teste_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -udmcard_ci -pteste_ci"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DATABASE_URL: mysql+pymysql://dmcard_ci:teste_ci@127.0.0.1:3306/dmcard_ci
+      AUTH_SECRET: segredo-local-apenas-para-testes-1234567890123456
+      ADMIN_TOKEN: token-administrativo-teste-1234567890123456
+      COLABORADORES_DM: "{}"
+      CEP_API_BASE_URL: http://127.0.0.1:8765/ws
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: python -m pip install -r backend/requirements-dev.txt
+      - name: Iniciar serviços de teste
+        run: |
+          python backend/tests/cep_simulado.py > /tmp/cep.log 2>&1 &
+          (cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/api.log 2>&1) &
+          python -m http.server 5173 --bind 127.0.0.1 --directory frontend > /tmp/web.log 2>&1 &
+          for tentativa in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/api.log
+          exit 1
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node frontend/tests/jornada-mysql.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demonstracao-academica
+          path: |
+            demonstracao/
+            /tmp/api.log
+          if-no-files-found: warn

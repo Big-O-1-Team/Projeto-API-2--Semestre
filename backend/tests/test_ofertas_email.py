@@ -19,6 +19,7 @@ def ambiente(monkeypatch):
     monkeypatch.setenv("COLABORADORES_DM", '{"12345678909":"senha-de-teste"}')
     monkeypatch.setenv("AUTH_SECRET", "segredo-para-testar-confirmacao-de-ofertas-123456789")
     monkeypatch.setattr(offer_controller, "verificar_limite_consulta", lambda request: None)
+    monkeypatch.setattr(application_controller, "obter_uf_por_cep", lambda cep: "SP")
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},

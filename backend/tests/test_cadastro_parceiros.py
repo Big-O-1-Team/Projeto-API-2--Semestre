@@ -137,7 +137,7 @@ def test_rede_distancia_paginacao_e_bloqueio(cliente):
         resposta = cliente.post("/lojas/parceiras", headers=admin, json={"nome": nome, "estado": "SP", "cidade": "São José dos Campos", "endereco": "Rua Exemplo, 1", "cep": "12210000", "programa_id": programa["id"], "latitude": latitude, "longitude": -45.88})
         assert resposta.status_code == 201, resposta.text
         ids.append(resposta.json()["id"])
-    busca = cliente.get("/lojas/parceiras", params={"cep": "12210000", "latitude": -23.18, "longitude": -45.88, "limite": 1})
+    busca = cliente.post("/lojas/buscar", json={"cep": "12210000", "latitude": -23.18, "longitude": -45.88, "limite": 1})
     assert busca.status_code == 200, busca.text
     assert busca.json()["total"] == 2
     assert busca.json()["lojas"][0]["id"] == ids[1]
@@ -148,7 +148,7 @@ def test_rede_distancia_paginacao_e_bloqueio(cliente):
     assert primeira.json()["programa_id"] == programa["id"]
     assert cliente.post("/solicitacoes/", json={**payload, "loja_id": ids[1]}).status_code == 409
     assert cliente.post("/solicitacoes/", json={**payload, "cpf": "52998224725"}).status_code == 409
-    assert cliente.get("/lojas/parceiras", params={"cep": "12210000", "latitude": 1}).status_code == 400
+    assert cliente.post("/lojas/buscar", json={"cep": "12210000", "latitude": 1}).status_code == 400
 
 
 def test_pre_qualificacao_ficticia(cliente, monkeypatch):

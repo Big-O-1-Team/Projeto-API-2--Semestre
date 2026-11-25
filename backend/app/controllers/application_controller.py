@@ -4,7 +4,7 @@ import hashlib
 import secrets
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
@@ -45,6 +45,11 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     if tipo_cartao not in TIPOS_CARTAO:
         raise HTTPException(status_code=400, detail="Tipo de cartão inválido.")
 
+    try:
+        uf_cliente = obter_uf_por_cep(cep)
+    except ValueError as erro:
+        raise HTTPException(400, str(erro)) from erro
+
     loja = None
     contribuidor = None
 
@@ -62,13 +67,8 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
         if loja.modalidade != tipo_cartao or (loja.programa and (not loja.programa.ativo or not loja.programa.rede.ativo)):
             raise HTTPException(400, "Esta unidade não oferece a modalidade solicitada.")
-        if tipo_cartao == "LOJA_FISICA":
-            try:
-                uf_cliente = obter_uf_por_cep(cep)
-            except ValueError as erro:
-                raise HTTPException(400, str(erro)) from erro
-            if loja.estado != uf_cliente:
-                raise HTTPException(400, "A loja escolhida não pertence ao estado do CEP informado.")
+        if tipo_cartao == "LOJA_FISICA" and loja.estado != uf_cliente:
+            raise HTTPException(400, "A loja escolhida não pertence ao estado do CEP informado.")
 
         if solicitacao.contribuidor_id is not None:
             contribuidor = db.query(PartnerContributor).filter(
@@ -100,7 +100,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
         status_solicitacao = "EM_ANALISE"
         if colaborador:
-            status_solicitacao = "APROVADO" if tipo_cartao == modalidade_permitida else "REPROVADO"
+            status_solicitacao = "APROVADO" if tipo_cartao == "DM" else "REPROVADO"
         elif pre_qualificado(cpf, tipo_cartao):
             status_solicitacao = "APROVADO"
 
@@ -139,7 +139,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
 
 @router.get("/{solicitacao_id}", response_model=ApplicationResponse)
-def buscar_solicitacao(solicitacao_id: int, request: Request, cpf: str = Query(min_length=11, max_length=14), codigo: str = Query(min_length=20, max_length=120), db: Session = Depends(get_db)):
+def buscar_solicitacao(solicitacao_id: int, request: Request, cpf: str = Header(min_length=11, max_length=14, alias="X-CPF"), codigo: str = Header(min_length=20, max_length=120, alias="X-Codigo-Consulta"), db: Session = Depends(get_db)):
     verificar_limite_consulta(request)
     pedido = db.query(Application).join(User).filter(Application.id == solicitacao_id, User.cpf == somente_numeros(cpf), Application.codigo_consulta_hash == hashlib.sha256(codigo.encode()).hexdigest()).first()
     if not pedido:

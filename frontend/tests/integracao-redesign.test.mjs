@@ -55,6 +55,6 @@ test("os três cartões, o CEP e o envio continuam disponíveis", () => {
 test("backend mantém consulta por CPF e aprovação por modalidade", () => {
   assert.ok(backend.includes('@router.post("/consultar"'));
   assert.ok(backend.includes("modalidade_autorizada(cpf, db)"));
-  assert.ok(backend.includes("tipo_cartao == modalidade_permitida"));
+  assert.ok(backend.includes('tipo_cartao == "DM"'));
   assert.ok(colaboradores.includes("from app.models.collaborator import Collaborator"));
 });

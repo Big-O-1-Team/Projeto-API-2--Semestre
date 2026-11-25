@@ -8,7 +8,7 @@ from app.models.partner_store import PartnerStore
 from app.models.card_program import PartnerNetwork, CardProgram
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
-from app.schemas.partner_store import PartnerStoreResponse, PartnerStoreSearchResponse, StoreEmissionUpdate, PartnerStoreCreate, NetworkCreate, ProgramCreate, StoreProgramUpdate
+from app.schemas.partner_store import PartnerStoreResponse, PartnerStoreSearchResponse, StoreEmissionUpdate, PartnerStoreCreate, NetworkCreate, ProgramCreate, StoreProgramUpdate, StoreSearch
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.models.partner_contributor import PartnerContributor
 from app.schemas.partner import PartnerContributorPublic
@@ -34,13 +34,20 @@ def distancia_km(lat1, lon1, lat2, lon2):
 def buscar_lojas_parceiras(
     cep: str = "",
     modalidade: str = "LOJA_FISICA",
-    latitude: float | None = Query(default=None, ge=-90, le=90),
-    longitude: float | None = Query(default=None, ge=-180, le=180),
     busca: str = Query(default="", max_length=120),
     pagina: int = Query(default=1, ge=1),
     limite: int = Query(default=50, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
+    return pesquisar_lojas(cep, modalidade, None, None, busca, pagina, limite, db)
+
+
+@router.post("/buscar", response_model=PartnerStoreSearchResponse)
+def buscar_por_localizacao(dados: StoreSearch, db: Session = Depends(get_db)):
+    return pesquisar_lojas(dados.cep, dados.modalidade, dados.latitude, dados.longitude, dados.busca, dados.pagina, dados.limite, db)
+
+
+def pesquisar_lojas(cep, modalidade, latitude, longitude, busca, pagina, limite, db):
     if modalidade not in ("LOJA_FISICA", "LOJA_DIGITAL"):
         raise HTTPException(400, "Modalidade inválida.")
     if (latitude is None) != (longitude is None):

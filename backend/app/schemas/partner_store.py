@@ -89,3 +89,13 @@ class StoreProgramUpdate(BaseModel):
     programa_id: int | None = Field(default=None, gt=0)
     latitude: float | None = Field(default=None, ge=-90, le=90)
     longitude: float | None = Field(default=None, ge=-180, le=180)
+
+
+class StoreSearch(BaseModel):
+    cep: str = Field(default="", max_length=9)
+    modalidade: Literal["LOJA_FISICA", "LOJA_DIGITAL"] = "LOJA_FISICA"
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    busca: str = Field(default="", max_length=120)
+    pagina: int = Field(default=1, ge=1)
+    limite: int = Field(default=50, ge=1, le=100)

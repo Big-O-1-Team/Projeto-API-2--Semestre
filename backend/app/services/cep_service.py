@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from urllib.error import URLError
 from urllib.request import urlopen
@@ -14,7 +15,8 @@ def obter_uf_por_cep(cep: str) -> str:
         raise ValueError("CEP inválido. Informe 8 números.")
 
     try:
-        with urlopen(f"https://viacep.com.br/ws/{cep_limpo}/json/", timeout=5) as resposta:
+        base = os.getenv("CEP_API_BASE_URL", "https://viacep.com.br/ws").rstrip("/")
+        with urlopen(f"{base}/{cep_limpo}/json/", timeout=5) as resposta:
             dados = json.loads(resposta.read().decode("utf-8"))
     except (URLError, TimeoutError, ValueError) as erro:
         raise ValueError("Não foi possível validar o CEP. Tente novamente.") from erro

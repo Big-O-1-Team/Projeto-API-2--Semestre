@@ -1,6 +1,7 @@
 import re
 from app.controllers.store_controller import validar_administrador
 from app.services.qualificacao_service import cpf_valido
+from app.services.cep_service import obter_uf_por_cep
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -26,6 +27,11 @@ def criar_usuario(usuario: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Telefone inválido.")
     if len(cep) != 8:
         raise HTTPException(status_code=400, detail="CEP deve conter 8 números.")
+
+    try:
+        obter_uf_por_cep(cep)
+    except ValueError as erro:
+        raise HTTPException(400, str(erro)) from erro
 
     usuario_existente = db.query(User).filter(
         (User.cpf == cpf) | (User.email == str(usuario.email))
