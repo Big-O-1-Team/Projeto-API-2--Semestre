@@ -23,7 +23,9 @@ const PassoTres = {
       '<div><span>Cartão</span><strong>', escaparHtml(AppState.nomeCartao || solicitacao.tipo_cartao), '</strong></div>',
       '<div><span>Status</span><strong>', escaparHtml(formatarStatus(solicitacao.status)), '</strong></div>',
       AppState.loja ? '<div><span>Loja</span><strong>' + escaparHtml(AppState.loja.nome) + '</strong></div>' : '',
+      '<div><span>Código privado de acompanhamento</span><strong style="overflow-wrap:anywhere">', escaparHtml(solicitacao.codigo_consulta), '</strong></div>',
       '</div>',
+      '<p>Guarde o código para consultar seu pedido. Não compartilhe.</p>',
       '<div class="acoes-passo acoes-passo--centro">',
       '<button type="button" class="btn-secundario" id="consultar-solicitacao">Acompanhar solicitação</button>',
       '<button type="button" class="btn-primario" id="nova-solicitacao">Fazer nova solicitação</button>',
@@ -43,6 +45,7 @@ const PassoTres = {
 
     document.getElementById("consultar-solicitacao").addEventListener("click", () => {
       document.getElementById("cpf-consulta").value = AppState.dados.cpf;
+      document.getElementById("codigo-consulta").value = solicitacao.codigo_consulta;
       document.getElementById("consultar-status").scrollIntoView({ behavior: "smooth", block: "start" });
       document.getElementById("consulta-status-form").requestSubmit();
     });
@@ -53,6 +56,7 @@ const PassoTres = {
       AppState.loja = null;
       AppState.dados = null;
       AppState.solicitacao = null;
+      document.getElementById("codigo-consulta").value = "";
       PassoUm.init();
       irParaPasso(1);
     });
@@ -74,6 +78,7 @@ const PassoTres = {
             solicitacao_id: solicitacao.id,
             cpf: AppState.dados.cpf,
             email: AppState.dados.email,
+            codigo: solicitacao.codigo_consulta,
             aceitar: true
           })
         });

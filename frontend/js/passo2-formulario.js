@@ -3,7 +3,9 @@ const PassoDois = {
     const passo = document.getElementById("passo-2");
     if (!passo) return;
 
-    const precisaLoja = AppState.tipoCartao === "LOJA_FISICA";
+    const precisaLoja = AppState.tipoCartao !== "DM";
+    this.localizacao = null;
+    this.buscaAtual = 0;
 
     AppState.loja = null;
     AppState.contribuidorId = null;
@@ -40,9 +42,14 @@ const PassoDois = {
             </div>
           </div>
           ${precisaLoja ? `
+            <div class="campo campo--completo">
+              <label for="filtro-parceiros">Loja, rede ou cidade</label>
+              <input id="filtro-parceiros" type="search" placeholder="Buscar por nome">
+              <button type="button" class="btn-secundario" id="filtrar-parceiros">Pesquisar</button>
+              ${AppState.tipoCartao === "LOJA_FISICA" ? '<button type="button" class="btn-secundario" id="usar-localizacao">Usar minha localização</button><small>A localização é opcional e usada apenas para ordenar as lojas elegíveis pelo CEP.</small>' : ""}
+            </div>
             <div class="lojas-box" id="lojas-box">
-              <strong>Lojas parceiras</strong>
-              <p>Informe seu CEP e clique em “Buscar lojas”.</p>
+              <p>Escolha uma unidade ou parceiro digital.</p>
             </div>
           ` : ""}
         </div>
@@ -59,6 +66,8 @@ const PassoDois = {
 
     if (precisaLoja) {
       document.getElementById("buscar-lojas").addEventListener("click", () => this.buscarLojas());
+      document.getElementById("filtrar-parceiros").addEventListener("click", () => this.buscarLojas());
+      document.getElementById("usar-localizacao")?.addEventListener("click", () => this.usarLocalizacao());
     }
 
     document.getElementById("form-dados").addEventListener("submit", (evento) => this.enviar(evento));
@@ -85,6 +94,8 @@ const PassoDois = {
       const valor = apenasNumeros(cep.value).slice(0, 8);
       cep.value = valor.replace(/(\d{5})(\d{1,3})/, "$1-$2");
 
+      this.buscaAtual++;
+      this.localizacao = null;
       AppState.loja = null;
       AppState.contribuidorId = null;
       AppState.contribuidoresCarregados = false;
@@ -101,108 +112,108 @@ const PassoDois = {
     });
   },
 
-  async buscarLojas() {
-    const cep = apenasNumeros(document.getElementById("cep").value);
-    const box = document.getElementById("lojas-box");
-
-    if (cep.length !== 8) {
-      mostrarMensagem("Informe um CEP com 8 números antes de buscar as lojas.");
+  usarLocalizacao() {
+    if (!navigator.geolocation) {
+      mostrarMensagem("Localização indisponível. Busque pelo CEP.");
       return;
     }
+    if (apenasNumeros(document.getElementById("cep").value).length !== 8) {
+      mostrarMensagem("Informe primeiro o CEP.");
+      return;
+    }
+    const cep = document.getElementById("cep").value;
+    const botao = document.getElementById("usar-localizacao");
+    botao.disabled = true;
+    navigator.geolocation.getCurrentPosition(posicao => {
+      botao.disabled = false;
+      if (!botao.isConnected || document.getElementById("cep").value !== cep) return;
+      this.localizacao = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+      this.buscarLojas();
+    }, () => {
+      botao.disabled = false;
+      this.localizacao = null;
+      mostrarMensagem("Não foi possível acessar sua localização. Use o CEP.");
+    }, { timeout: 10000, maximumAge: 0 });
+  },
 
+  async buscarLojas(pagina = 1) {
+    const cep = apenasNumeros(document.getElementById("cep").value);
+    const box = document.getElementById("lojas-box");
+    const modalidade = AppState.tipoCartao;
+    if (cep.length !== 8) {
+      mostrarMensagem("Informe um CEP com 8 números.");
+      return;
+    }
+    const pedido = ++this.buscaAtual;
     esconderMensagem();
     AppState.loja = null;
     AppState.contribuidorId = null;
     AppState.contribuidoresCarregados = false;
-    AppState.contribuidoresDisponiveis = false;
-
-    box.innerHTML = "<strong>Lojas parceiras</strong><p>Buscando lojas...</p>";
-
+    box.textContent = "Buscando lojas...";
     try {
-      const resposta = await apiRequest(`/lojas/parceiras?cep=${cep}`);
-
-      if (apenasNumeros(document.getElementById("cep").value) !== cep) return;
-
-      if (!resposta.lojas.length) {
-        box.innerHTML = `<strong>Lojas parceiras em ${escaparHtml(resposta.uf)}</strong><p>Nenhuma loja cadastrada para este estado no ambiente de demonstração.</p>`;
-        return;
+      const params = new URLSearchParams({ cep, modalidade, pagina, limite: 50, busca: document.getElementById("filtro-parceiros").value });
+      if (this.localizacao && modalidade === "LOJA_FISICA") {
+        params.set("latitude", this.localizacao.latitude);
+        params.set("longitude", this.localizacao.longitude);
       }
-
-      box.innerHTML = `
-        <strong>Lojas parceiras em ${escaparHtml(resposta.uf)}</strong>
-        <p>${resposta.total} opção(ões) encontrada(s). Escolha uma para continuar.</p>
-        <select id="loja-id" aria-label="Escolha uma loja parceira" required>
-          <option value="">Selecione uma loja</option>
-          ${resposta.lojas.map(loja => `<option value="${loja.id}">${escaparHtml(loja.nome)} — ${escaparHtml(loja.cidade)}${loja.emite_cartao_credito ? " (emite cartão)" : ""}</option>`).join("")}
-        </select>
-      `;
-
-      const seletorLoja = document.getElementById("loja-id");
-      const filtroLoja = document.createElement("input");
-      filtroLoja.type = "search";
-      filtroLoja.id = "filtro-lojas";
-      filtroLoja.placeholder = "Buscar loja ou cidade";
-      filtroLoja.setAttribute("aria-label", "Filtrar lojas por nome ou cidade");
-      seletorLoja.before(filtroLoja);
-
-      const lojasOrdenadas = [...resposta.lojas].sort((a, b) =>
-        a.cidade.localeCompare(b.cidade, "pt-BR") || a.nome.localeCompare(b.nome, "pt-BR")
-      );
-
-      const atualizarLojas = () => {
-        const termo = filtroLoja.value.trim().toLocaleLowerCase("pt-BR");
-        const filtradas = lojasOrdenadas.filter(loja =>
-          `${loja.nome} ${loja.cidade}`.toLocaleLowerCase("pt-BR").includes(termo)
-        );
-        const selecionada = seletorLoja.value;
-        seletorLoja.replaceChildren(new Option("Selecione uma loja", ""));
-        let grupo = null;
-        let cidadeAtual = "";
-        filtradas.forEach(loja => {
-          if (loja.cidade !== cidadeAtual) {
-            cidadeAtual = loja.cidade;
-            grupo = document.createElement("optgroup");
-            grupo.label = cidadeAtual;
-            seletorLoja.append(grupo);
-          }
-          const opcao = new Option(
-            `${loja.nome}${loja.emite_cartao_credito ? " (emite cartão)" : ""}`,
-            String(loja.id)
-          );
-          grupo.append(opcao);
-        });
-        if (filtradas.some(loja => String(loja.id) === selecionada)) {
-          seletorLoja.value = selecionada;
-        } else if (selecionada) {
-          seletorLoja.dispatchEvent(new Event("change"));
+      const resposta = await apiRequest("/lojas/parceiras?" + params);
+      if (pedido !== this.buscaAtual || !box.isConnected || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
+      box.replaceChildren();
+      const resumo = document.createElement("p");
+      resumo.textContent = resposta.total + " unidade(s) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");
+      box.append(resumo);
+      if (!resposta.lojas.length) return;
+      const seletor = document.createElement("select");
+      seletor.id = "loja-id";
+      seletor.required = true;
+      seletor.setAttribute("aria-label", "Escolha a unidade");
+      seletor.append(new Option("Selecione uma unidade", ""));
+      const grupos = new Map();
+      for (const loja of resposta.lojas) {
+        const nome = loja.rede_nome ? loja.rede_nome + " — " + loja.programa_nome : "Lojas independentes";
+        if (!grupos.has(nome)) {
+          const grupo = document.createElement("optgroup");
+          grupo.label = nome;
+          seletor.append(grupo);
+          grupos.set(nome, grupo);
         }
-        const resumo = document.getElementById("resumo-filtro-lojas");
-        if (resumo) resumo.textContent = `${filtradas.length} loja(s) encontrada(s).`;
-      };
-
-      const resumoFiltro = document.createElement("p");
-      resumoFiltro.id = "resumo-filtro-lojas";
-      resumoFiltro.setAttribute("aria-live", "polite");
-      seletorLoja.after(resumoFiltro);
-      filtroLoja.addEventListener("input", atualizarLojas);
-      atualizarLojas();
-
-      document.getElementById("loja-id").addEventListener("change", async (evento) => {
-        const loja = resposta.lojas.find(item => String(item.id) === evento.target.value);
-
+        const distancia = loja.distancia_km == null ? "" : " — " + loja.distancia_km.toLocaleString("pt-BR") + " km";
+        const local = modalidade === "LOJA_DIGITAL" ? "" : " — " + loja.cidade + ", " + loja.endereco;
+        const opcao = new Option(loja.nome + local + distancia, String(loja.id));
+        if (this.localizacao) {
+          opcao.textContent = (loja.rede_nome ? loja.rede_nome + " — " : "") + opcao.textContent;
+          seletor.append(opcao);
+        } else grupos.get(nome).append(opcao);
+      }
+      if (this.localizacao) seletor.querySelectorAll("optgroup").forEach(g => { if (!g.children.length) g.remove(); });
+      box.append(seletor);
+      const navegacao = document.createElement("div");
+      navegacao.className = "acoes-passo";
+      for (const [texto, destino, desabilitado] of [["Anterior", pagina - 1, pagina === 1], ["Próxima", pagina + 1, pagina * resposta.limite >= resposta.total]]) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn-secundario";
+        b.textContent = texto;
+        b.disabled = desabilitado;
+        b.addEventListener("click", () => this.buscarLojas(destino));
+        navegacao.append(b);
+      }
+      box.append(navegacao);
+      const detalhe = document.createElement("p");
+      detalhe.setAttribute("aria-live", "polite");
+      box.append(detalhe);
+      seletor.addEventListener("change", async () => {
+        const loja = resposta.lojas.find(item => String(item.id) === seletor.value);
         AppState.loja = loja || null;
         AppState.contribuidorId = null;
         AppState.contribuidoresCarregados = false;
-        AppState.contribuidoresDisponiveis = false;
-
         document.getElementById("contribuidores-box")?.remove();
-
-        if (loja) {
-          await this.buscarContribuidores(loja.id);
-        }
+        detalhe.textContent = loja?.programa_nome ? "Cartão: " + loja.programa_nome + ". Uma solicitação por programa compartilhado." : "";
+        if (loja) await this.buscarContribuidores(loja.id);
       });
     } catch (erro) {
-      box.innerHTML = "<strong>Lojas parceiras</strong><p>Não foi possível consultar as lojas.</p>";
+      if (pedido !== this.buscaAtual || !box.isConnected) return;
+      box.textContent = "Não foi possível consultar as lojas.";
       mostrarMensagem(erro.message);
     }
   },
@@ -244,10 +255,9 @@ const PassoDois = {
     } catch (erro) {
       if (AppState.loja?.id !== lojaId) return;
 
-      AppState.contribuidoresCarregados = false;
+      AppState.contribuidoresCarregados = true;
       AppState.contribuidorId = null;
-      container.textContent = "Não foi possível carregar os contribuidores. Tente selecionar a loja novamente.";
-      mostrarMensagem(erro.message);
+      container.textContent = "Atendente indisponível. Você pode continuar sem atribuição.";
     }
   },
 
@@ -259,12 +269,12 @@ const PassoDois = {
 
     if (!form.reportValidity()) return;
 
-    if (AppState.tipoCartao === "LOJA_FISICA" && !AppState.loja) {
+    if (AppState.tipoCartao !== "DM" && !AppState.loja) {
       mostrarMensagem("Busque o CEP e escolha uma loja parceira antes de enviar.");
       return;
     }
 
-    if (AppState.tipoCartao === "LOJA_FISICA" && !AppState.contribuidoresCarregados) {
+    if (AppState.tipoCartao !== "DM" && !AppState.contribuidoresCarregados) {
       mostrarMensagem("Não foi possível carregar os contribuidores. Selecione a loja novamente.");
       return;
     }

@@ -81,6 +81,8 @@ def seed_database():
             db.add(programa)
             db.flush()
             db.query(PartnerStore).filter(PartnerStore.nome.in_(["Loja Parceira Centro SJC", "Loja Parceira Jardim Aquarius"]), PartnerStore.programa_id.is_(None)).update({PartnerStore.programa_id: programa.id}, synchronize_session=False)
+            for nome, lat, lon in [("Loja Parceira Centro SJC", -23.186, -45.884), ("Loja Parceira Jardim Aquarius", -23.222, -45.913)]:
+                db.query(PartnerStore).filter_by(nome=nome, latitude=None, longitude=None).update({"latitude": lat, "longitude": lon}, synchronize_session=False)
         digital = db.query(CardProgram).filter_by(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL").first()
         if digital is None:
             digital = CardProgram(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL")

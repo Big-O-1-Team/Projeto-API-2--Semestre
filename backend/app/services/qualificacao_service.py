@@ -16,5 +16,11 @@ def cpf_valido(cpf):
 def pre_qualificado(cpf, modalidade):
     if os.getenv("DEMO_PRE_QUALIFICACAO", "0") != "1":
         return False
-    dados = json.loads(os.getenv("PRE_QUALIFICADOS_FICTICIOS", "{}"))
-    return modalidade in dados.get(cpf, [])
+    try:
+        dados = json.loads(os.getenv("PRE_QUALIFICADOS_FICTICIOS") or "{}")
+    except ValueError:
+        return False
+    if not isinstance(dados, dict):
+        return False
+    modalidades = dados.get(cpf)
+    return isinstance(modalidades, list) and modalidade in modalidades

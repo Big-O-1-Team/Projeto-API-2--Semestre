@@ -63,6 +63,9 @@ formularioLoja.addEventListener("submit", async (evento) => {
       cidade: String(dados.get("cidade") || "").trim(),
       endereco: String(dados.get("endereco") || "").trim(),
       cep,
+      programa_id: dados.get("programa_id") ? Number(dados.get("programa_id")) : null,
+      latitude: dados.get("latitude") ? Number(dados.get("latitude")) : null,
+      longitude: dados.get("longitude") ? Number(dados.get("longitude")) : null,
       emite_cartao_credito: dados.has("emite_cartao_credito")
     });
     lojaCriadaId = loja.id;
@@ -109,3 +112,35 @@ formularioConta.addEventListener("submit", async (evento) => {
     botao.textContent = "Criar acesso";
   }
 });
+
+async function carregarProgramas() {
+  const resposta = await fetch(API_URL + "/lojas/programas");
+  if (!resposta.ok) throw new Error("Não foi possível consultar os programas.");
+  const programas = await resposta.json();
+  const seletor = document.getElementById("loja-programa");
+  seletor.replaceChildren(new Option("Loja independente", ""));
+  programas.forEach(p => seletor.append(new Option(p.rede + " — " + p.nome + " (#" + p.id + ")", p.id)));
+}
+document.getElementById("carregar-programas").addEventListener("click", () => carregarProgramas().catch(e => apresentarMensagem(e.message)));
+document.getElementById("programa-form").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const botao = evento.currentTarget.querySelector("button");
+  botao.disabled = true;
+  try {
+    let id = Number(document.getElementById("rede-id").value);
+    if (!id) {
+      const rede = await requisitarAdmin("/lojas/redes", { nome: document.getElementById("rede-nome").value.trim() });
+      id = rede.id;
+      document.getElementById("rede-id").value = id;
+    }
+    const p = await requisitarAdmin("/lojas/programas", { rede_id: id, nome: document.getElementById("programa-nome").value.trim(), modalidade: document.getElementById("programa-modalidade").value });
+    await carregarProgramas();
+    document.getElementById("loja-programa").value = p.id;
+    apresentarMensagem("Programa cadastrado. Rede #" + id + ".", true);
+  } catch (erro) {
+    apresentarMensagem(erro.message);
+  } finally {
+    botao.disabled = false;
+  }
+});
+carregarProgramas().catch(() => {});

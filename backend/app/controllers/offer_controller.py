@@ -1,4 +1,5 @@
 import logging
+import hashlib
 import re
 import smtplib
 from datetime import datetime
@@ -25,6 +26,7 @@ class InteresseOferta(BaseModel):
     cpf: str = Field(min_length=11, max_length=14)
     email: EmailStr
     aceitar: bool
+    codigo: str = Field(min_length=20, max_length=120)
 
     model_config = ConfigDict(extra="forbid")
 
@@ -56,6 +58,7 @@ def registrar_interesse(
             User.cpf == cpf,
             User.email == str(dados.email),
             Application.status == "REPROVADO",
+            Application.codigo_consulta_hash == hashlib.sha256(dados.codigo.encode()).hexdigest(),
         )
         .first()
     )

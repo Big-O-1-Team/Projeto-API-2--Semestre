@@ -196,3 +196,7 @@
     padding: 13px;
   }
 }
+
+#filtro-parceiros { margin-bottom: 8px; }
+#filtrar-parceiros, #usar-localizacao { margin: 4px 0; }
+.lojas-box select { width: 100%; max-width: 100%; }

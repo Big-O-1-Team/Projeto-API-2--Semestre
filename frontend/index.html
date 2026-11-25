@@ -130,11 +130,12 @@
 
     <section id="consultar-status" class="consulta-status">
       <div class="container consulta-status__container">
-        <div class="consulta-status__texto"><span class="consulta-status__etiqueta">ACOMPANHE DE PERTO</span><h2>Seu pedido, sempre ao seu alcance.</h2><p>Já fez sua solicitação? Informe seu CPF para visualizar todos os pedidos e seus status.</p><div class="consulta-status__detalhe"><span aria-hidden="true">↗</span><p>É rápido, fácil e você não precisa preencher tudo de novo.</p></div></div>
+        <div class="consulta-status__texto"><span class="consulta-status__etiqueta">ACOMPANHE DE PERTO</span><h2>Seu pedido, sempre ao seu alcance.</h2><p>Já fez sua solicitação? Informe seu CPF e o código privado recebido ao solicitar.</p><div class="consulta-status__detalhe"><span aria-hidden="true">↗</span><p>É rápido, fácil e você não precisa preencher tudo de novo.</p></div></div>
         <form id="consulta-status-form" class="consulta-status__form">
-          <div class="consulta-status__form-cabecalho"><span class="consulta-status__form-icone" aria-hidden="true">⌕</span><div><strong>Acompanhar pedidos</strong><p>Consulte com seu CPF</p></div></div>
+          <div class="consulta-status__form-cabecalho"><span class="consulta-status__form-icone" aria-hidden="true">⌕</span><div><strong>Acompanhar pedidos</strong><p>Consulte seu pedido</p></div></div>
           
           <div class="campo"><label for="cpf-consulta">CPF</label><input id="cpf-consulta" name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" required placeholder="000.000.000-00"></div>
+          <div class="campo"><label for="codigo-consulta">Código privado</label><input id="codigo-consulta" name="codigo" autocomplete="off" minlength="20" maxlength="120" required></div>
           <button class="btn-primario" type="submit">Buscar solicitações <span aria-hidden="true">→</span></button>
           <div id="consulta-status-resultado" class="consulta-status__resultado" aria-live="polite" hidden></div>
         </form>

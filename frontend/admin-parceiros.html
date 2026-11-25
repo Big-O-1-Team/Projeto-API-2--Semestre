@@ -40,6 +40,15 @@
         <input id="token-admin" type="password" autocomplete="off" required placeholder="Informe sua chave de acesso">
       </div>
 
+      <form id="programa-form">
+        <div class="admin-grid">
+          <div class="campo"><label for="rede-nome">Nova rede</label><input id="rede-nome" maxlength="120"></div>
+          <div class="campo"><label for="rede-id">ID da rede existente</label><input id="rede-id" type="number" min="1"></div>
+          <div class="campo"><label for="programa-nome">Nome do cartão</label><input id="programa-nome" required maxlength="120"></div>
+          <div class="campo"><label for="programa-modalidade">Modalidade</label><select id="programa-modalidade"><option value="LOJA_FISICA">Física</option><option value="LOJA_DIGITAL">Digital</option></select></div>
+        </div>
+        <button type="submit" class="btn-primario">Cadastrar programa</button>
+      </form>
       <form id="loja-form">
         <div class="admin-grid">
           <div class="campo admin-grid__completo">
@@ -65,6 +74,9 @@
             <label for="loja-cep">CEP</label>
             <input id="loja-cep" name="cep" required inputmode="numeric" maxlength="9" placeholder="00000-000">
           </div>
+          <div class="campo admin-grid__completo"><label for="loja-programa">Programa de cartão (opcional)</label><select id="loja-programa" name="programa_id"><option value="">Loja independente</option></select><button id="carregar-programas" type="button" class="btn-primario">Atualizar programas</button></div>
+          <div class="campo"><label for="latitude">Latitude (opcional)</label><input id="latitude" name="latitude" type="number" step="any" min="-90" max="90"></div>
+          <div class="campo"><label for="longitude">Longitude (opcional)</label><input id="longitude" name="longitude" type="number" step="any" min="-180" max="180"></div>
           <label class="admin-checkbox"><input type="checkbox" name="emite_cartao_credito"><span>Esta loja emite cartão de crédito</span></label>
         </div>
         <button type="submit" class="btn-primario" id="cadastrar-loja">Cadastrar loja <span aria-hidden="true">→</span></button>
