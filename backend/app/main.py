@@ -8,6 +8,7 @@ from app.controllers.collaborator_controller import router as collaborator_route
 from app.controllers.store_controller import router as store_router
 from app.controllers.user_controller import router as user_router
 from app.controllers.partner_controller import router as partner_router
+from app.controllers.offer_controller import router as offer_router
 from app.middleware.rate_limit import limitar_requisicoes
 from app.models.application import Application
 from app.models.card import Card
@@ -16,6 +17,7 @@ from app.models.partner_store import PartnerStore
 from app.models.partner_contributor import PartnerContributor
 from app.models.partner_account import PartnerAccount
 from app.models.user import User
+from app.models.offer_interest import OfferInterest
 from app.seed import seed_database
 
 Base.metadata.create_all(bind=engine)
@@ -98,6 +100,7 @@ app.include_router(store_router)
 app.include_router(application_router)
 app.include_router(collaborator_router)
 app.include_router(partner_router)
+app.include_router(offer_router)
 
 @app.get("/")
 def home():

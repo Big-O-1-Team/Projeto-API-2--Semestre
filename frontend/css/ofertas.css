@@ -1,0 +1,142 @@
+.ofertas {
+  margin-top: 28px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #e2e8fa;
+  border-radius: 20px;
+  background: #f7f9ff;
+}
+
+.ofertas__eyebrow {
+  color: #2737bd;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0 0 10px;
+}
+
+.ofertas h3 {
+  margin: 0 0 10px;
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  color: #152155;
+  line-height: 1.25;
+}
+
+.ofertas__intro {
+  color: #52607f;
+  line-height: 1.55;
+  margin: 0 0 22px;
+}
+
+.ofertas__grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ofertas__card {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #e0e5f2;
+  background: #fff;
+  box-shadow: 0 4px 18px #1823670a;
+}
+
+.ofertas__icone {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #252ec9;
+  border-radius: 10px;
+  background: #ecefff;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.ofertas__card h4 {
+  margin: 0 0 8px;
+  color: #172153;
+  font-size: 1.02rem;
+}
+
+.ofertas__card p {
+  margin: 0 0 14px;
+  line-height: 1.5;
+  color: #4e5b73;
+  font-size: 0.93rem;
+}
+
+.ofertas__card > span:last-child {
+  color: #64718b;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ofertas__consentimento {
+  margin-top: 20px;
+  background: #fff;
+  border: 1px solid #d9e2ff;
+  border-radius: 18px;
+  padding: clamp(20px, 4vw, 28px);
+  text-align: left;
+}
+
+.ofertas__consentimento h3 {
+  color: #18215c;
+  margin: 0 0 10px;
+}
+
+.ofertas__consentimento > p {
+  line-height: 1.5;
+  color: #52607f;
+}
+
+.ofertas__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 22px 0;
+  cursor: pointer;
+  line-height: 1.5;
+  color: #2d3759;
+}
+
+.ofertas__check input {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  margin: 2px 0 0;
+  accent-color: #252ec9;
+}
+
+.ofertas__consentimento button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.ofertas__retorno {
+  min-height: 1.2em;
+  margin-bottom: 0;
+  font-size: 0.93rem;
+  color: #52607f;
+}
+
+.ofertas__retorno[data-situacao="CONFIRMADO"],
+.ofertas__retorno[data-situacao="AGUARDANDO_CONFIRMACAO"] {
+  color: #216e49;
+}
+
+.ofertas__retorno[data-situacao="ERRO"] {
+  color: #b42318;
+}
+
+@media (max-width: 600px) {
+  .ofertas__grade {
+    grid-template-columns: 1fr;
+  }
+
+  .ofertas__card {
+    padding: 18px;
+  }
+}
