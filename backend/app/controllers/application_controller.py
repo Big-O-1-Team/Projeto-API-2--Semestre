@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
 from app.models.partner_store import PartnerStore
+from app.models.card_program import programa_unidades
 from app.models.partner_contributor import PartnerContributor
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationCreated, ApplicationListResponse, ConsultaCpf
@@ -52,6 +53,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
     loja = None
     contribuidor = None
+    programa = None
 
     if tipo_cartao == "LOJA_FISICA" or (tipo_cartao == "LOJA_DIGITAL" and solicitacao.loja_id):
         if not solicitacao.loja_id:
@@ -65,7 +67,16 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         if not loja:
             raise HTTPException(status_code=404, detail="Loja parceira não encontrada.")
 
-        if loja.modalidade != tipo_cartao or (loja.programa and (not loja.programa.ativo or not loja.programa.rede.ativo)):
+        programas = [p for p in loja.programas if p.ativo and p.rede.ativo and p.modalidade == tipo_cartao]
+        if solicitacao.programa_id is not None:
+            programa = next((p for p in programas if p.id == solicitacao.programa_id), None)
+            if programa is None:
+                raise HTTPException(400, "Programa inválido para esta unidade.")
+        elif len(programas) == 1:
+            programa = programas[0]
+        elif len(programas) > 1:
+            raise HTTPException(400, "Escolha o programa de cartão.")
+        elif loja.programas or tipo_cartao != "LOJA_FISICA":
             raise HTTPException(400, "Esta unidade não oferece a modalidade solicitada.")
         if tipo_cartao == "LOJA_FISICA" and loja.estado != uf_cliente:
             raise HTTPException(400, "A loja escolhida não pertence ao estado do CEP informado.")
@@ -80,7 +91,7 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             if not contribuidor:
                 raise HTTPException(status_code=400, detail="Contribuidor inválido, inativo ou pertencente a outra loja.")
 
-    elif solicitacao.loja_id is not None or solicitacao.contribuidor_id is not None:
+    elif solicitacao.loja_id is not None or solicitacao.contribuidor_id is not None or solicitacao.programa_id is not None:
         raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja ou contribuidor.")
 
     usuario_cpf = db.query(User).filter(User.cpf == cpf).with_for_update().first()
@@ -104,14 +115,14 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
         elif pre_qualificado(cpf, tipo_cartao):
             status_solicitacao = "APROVADO"
 
-        programa_id = loja.programa_id if loja else None
+        programa_id = programa.id if programa else None
         chave = None
         if status_solicitacao != "REPROVADO":
             grupo = f"programa:{programa_id}" if programa_id else (f"loja:{loja.id}" if loja else tipo_cartao)
             chave = f"{usuario.id}:{tipo_cartao}:{grupo}"
             anteriores = db.query(Application).filter(Application.usuario_id == usuario.id, Application.tipo_cartao == tipo_cartao, Application.status.in_(["APROVADO", "EM_ANALISE"]))
             if programa_id:
-                anteriores = anteriores.filter(or_(Application.programa_id == programa_id, Application.loja_id.in_(db.query(PartnerStore.id).filter(PartnerStore.programa_id == programa_id))))
+                anteriores = anteriores.filter(or_(Application.programa_id == programa_id, (Application.programa_id.is_(None) & Application.loja_id.in_(db.query(programa_unidades.c.loja_id).filter(programa_unidades.c.programa_id == programa_id)))))
             elif loja:
                 anteriores = anteriores.filter(Application.loja_id == loja.id)
             else:

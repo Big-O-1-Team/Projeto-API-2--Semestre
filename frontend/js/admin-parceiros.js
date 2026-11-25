@@ -10,12 +10,12 @@ function apresentarMensagem(texto, sucesso = false) {
   aviso.classList.toggle("sucesso", sucesso);
 }
 
-async function requisitarAdmin(caminho, corpo) {
+async function requisitarAdmin(caminho, corpo, metodo = "POST") {
   const token = document.getElementById("token-admin").value.trim();
   if (!token) throw new Error("Informe a chave de acesso administrativo.");
 
   const resposta = await fetch(API_URL + caminho, {
-    method: "POST",
+    method: metodo,
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -120,6 +120,9 @@ async function carregarProgramas() {
   const seletor = document.getElementById("loja-programa");
   seletor.replaceChildren(new Option("Loja independente", ""));
   programas.forEach(p => seletor.append(new Option(p.rede + " — " + p.nome + " (#" + p.id + ")", p.id)));
+  const existente = document.getElementById("programa-existente");
+  existente.replaceChildren(new Option("Somente coordenadas", ""));
+  programas.forEach(p => existente.append(new Option(p.rede + " — " + p.nome, p.id)));
 }
 document.getElementById("carregar-programas").addEventListener("click", () => carregarProgramas().catch(e => apresentarMensagem(e.message)));
 document.getElementById("programa-form").addEventListener("submit", async evento => {
@@ -144,3 +147,22 @@ document.getElementById("programa-form").addEventListener("submit", async evento
   }
 });
 carregarProgramas().catch(() => {});
+
+document.getElementById("vinculo-form").addEventListener("submit", async evento => {
+  evento.preventDefault();
+  const botao = evento.currentTarget.querySelector("button");
+  const dados = new FormData(evento.currentTarget);
+  botao.disabled = true;
+  try {
+    const loja = await requisitarAdmin("/lojas/parceiras/" + Number(dados.get("loja_id")) + "/programa", {
+      programa_id: dados.get("programa_id") ? Number(dados.get("programa_id")) : null,
+      latitude: dados.get("latitude") ? Number(dados.get("latitude")) : null,
+      longitude: dados.get("longitude") ? Number(dados.get("longitude")) : null
+    }, "PUT");
+    apresentarMensagem("Unidade " + loja.nome + " atualizada.", true);
+  } catch (erro) {
+    apresentarMensagem(erro.message);
+  } finally {
+    botao.disabled = false;
+  }
+});

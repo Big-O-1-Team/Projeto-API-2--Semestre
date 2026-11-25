@@ -11,6 +11,7 @@ class PartnerStoreResponse(BaseModel):
     emite_cartao_credito: bool
     role: str
     programa_id: int | None = None
+    programas_ids: list[int] = []
     rede_nome: str | None = None
     programa_nome: str | None = None
     modalidade: str = "LOJA_FISICA"

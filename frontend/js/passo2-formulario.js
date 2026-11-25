@@ -184,7 +184,7 @@ const PassoDois = {
         }
         const distancia = loja.distancia_km == null ? "" : " — " + loja.distancia_km.toLocaleString("pt-BR") + " km";
         const local = modalidade === "LOJA_DIGITAL" ? "" : " — " + loja.cidade + ", " + loja.endereco;
-        const opcao = new Option(loja.nome + local + distancia, String(loja.id));
+        const opcao = new Option(loja.nome + local + distancia, String(loja.id) + ":" + (loja.programa_id || ""));
         if (this.localizacao) {
           opcao.textContent = (loja.rede_nome ? loja.rede_nome + " — " : "") + opcao.textContent;
           seletor.append(opcao);
@@ -208,7 +208,7 @@ const PassoDois = {
       detalhe.setAttribute("aria-live", "polite");
       box.append(detalhe);
       seletor.addEventListener("change", async () => {
-        const loja = resposta.lojas.find(item => String(item.id) === seletor.value);
+        const loja = resposta.lojas.find(item => String(item.id) + ":" + (item.programa_id || "") === seletor.value);
         AppState.loja = loja || null;
         AppState.contribuidorId = null;
         AppState.contribuidoresCarregados = false;
@@ -293,6 +293,7 @@ const PassoDois = {
       cep: apenasNumeros(dadosForm.get("cep")),
       tipo_cartao: AppState.tipoCartao,
       loja_id: AppState.loja ? AppState.loja.id : null,
+      programa_id: AppState.loja?.programa_id || null,
       contribuidor_id: AppState.contribuidorId
     };
 

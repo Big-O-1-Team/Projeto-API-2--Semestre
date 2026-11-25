@@ -91,7 +91,6 @@ def adicionar_coluna(tabela, coluna, definicao):
 
 
 for tabela, coluna, definicao in [
-    ("estabelecimentos_parceiros", "programa_id", "INTEGER NULL REFERENCES programas_cartao(id)"),
     ("estabelecimentos_parceiros", "latitude", "FLOAT NULL"),
     ("estabelecimentos_parceiros", "longitude", "FLOAT NULL"),
     ("solicitacoes", "programa_id", "INTEGER NULL REFERENCES programas_cartao(id)"),
@@ -101,10 +100,18 @@ for tabela, coluna, definicao in [
     adicionar_coluna(tabela, coluna, definicao)
 
 if engine.dialect.name == "mysql":
-    for tabela in ("estabelecimentos_parceiros", "solicitacoes"):
-        if not any(fk.get("constrained_columns") == ["programa_id"] for fk in inspect(engine).get_foreign_keys(tabela)):
-            with engine.begin() as conexao:
-                conexao.execute(text(f"ALTER TABLE {tabela} ADD CONSTRAINT fk_{tabela}_programa FOREIGN KEY (programa_id) REFERENCES programas_cartao(id)"))
+    if not any(fk.get("constrained_columns") == ["programa_id"] for fk in inspect(engine).get_foreign_keys("solicitacoes")):
+        with engine.begin() as conexao:
+            conexao.execute(text("ALTER TABLE solicitacoes ADD CONSTRAINT fk_solicitacoes_programa FOREIGN KEY (programa_id) REFERENCES programas_cartao(id)"))
+
+if "programa_id" in colunas_lojas:
+    with engine.begin() as conexao:
+        conexao.execute(text(
+            "INSERT INTO programa_unidades (loja_id, programa_id) "
+            "SELECT l.id, l.programa_id FROM estabelecimentos_parceiros l "
+            "WHERE l.programa_id IS NOT NULL AND NOT EXISTS "
+            "(SELECT 1 FROM programa_unidades p WHERE p.loja_id = l.id AND p.programa_id = l.programa_id)"
+        ))
 
 for coluna in ("chave_ativa", "codigo_consulta_hash"):
     indices = inspect(engine).get_indexes("solicitacoes") + inspect(engine).get_unique_constraints("solicitacoes")

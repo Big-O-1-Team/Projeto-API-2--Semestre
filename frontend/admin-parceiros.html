@@ -49,6 +49,15 @@
         </div>
         <button type="submit" class="btn-primario">Cadastrar programa</button>
       </form>
+      <form id="vinculo-form">
+        <div class="admin-grid">
+          <div class="campo"><label for="unidade-existente">ID da unidade existente</label><input id="unidade-existente" name="loja_id" type="number" min="1" required></div>
+          <div class="campo"><label for="programa-existente">Adicionar programa</label><select id="programa-existente" name="programa_id"><option value="">Somente coordenadas</option></select></div>
+          <div class="campo"><label for="lat-existente">Latitude</label><input id="lat-existente" name="latitude" type="number" step="any" min="-90" max="90"></div>
+          <div class="campo"><label for="lon-existente">Longitude</label><input id="lon-existente" name="longitude" type="number" step="any" min="-180" max="180"></div>
+        </div>
+        <button class="btn-primario" type="submit">Atualizar unidade</button>
+      </form>
       <form id="loja-form">
         <div class="admin-grid">
           <div class="campo admin-grid__completo">

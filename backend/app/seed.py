@@ -80,7 +80,9 @@ def seed_database():
             programa = CardProgram(rede_id=rede.id, nome="Cartão Rede Demonstração", modalidade="LOJA_FISICA")
             db.add(programa)
             db.flush()
-            db.query(PartnerStore).filter(PartnerStore.nome.in_(["Loja Parceira Centro SJC", "Loja Parceira Jardim Aquarius"]), PartnerStore.programa_id.is_(None)).update({PartnerStore.programa_id: programa.id}, synchronize_session=False)
+            for loja in db.query(PartnerStore).filter(PartnerStore.nome.in_(["Loja Parceira Centro SJC", "Loja Parceira Jardim Aquarius"])).all():
+                if not loja.programas:
+                    loja.programas.append(programa)
             for nome, lat, lon in [("Loja Parceira Centro SJC", -23.186, -45.884), ("Loja Parceira Jardim Aquarius", -23.222, -45.913)]:
                 db.query(PartnerStore).filter_by(nome=nome, latitude=None, longitude=None).update({"latitude": lat, "longitude": lon}, synchronize_session=False)
         digital = db.query(CardProgram).filter_by(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL").first()
@@ -88,7 +90,9 @@ def seed_database():
             digital = CardProgram(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL")
             db.add(digital)
             db.flush()
-            db.add(PartnerStore(nome="Parceiro Digital Demonstração", estado="SP", cidade="São José dos Campos", endereco="Canal digital", cep="12210000", ativo=True, programa_id=digital.id))
+            loja_digital = PartnerStore(nome="Parceiro Digital Demonstração", estado="SP", cidade="São José dos Campos", endereco="Canal digital", cep="12210000", ativo=True)
+            loja_digital.programas.append(digital)
+            db.add(loja_digital)
 
         for dados in COLABORADORES_FICTICIOS:
             existe = db.query(Collaborator).filter(Collaborator.cpf == dados["cpf"]).first()

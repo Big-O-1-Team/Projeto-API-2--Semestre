@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.partner_store import PartnerStore
-from app.models.card_program import PartnerNetwork, CardProgram
+from app.models.card_program import PartnerNetwork, CardProgram, programa_unidades
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from app.schemas.partner_store import PartnerStoreResponse, PartnerStoreSearchResponse, StoreEmissionUpdate, PartnerStoreCreate, NetworkCreate, ProgramCreate, StoreProgramUpdate, StoreSearch
@@ -54,7 +54,7 @@ def pesquisar_lojas(cep, modalidade, latitude, longitude, busca, pagina, limite,
         raise HTTPException(400, "Informe latitude e longitude juntas.")
     cep_limpo = limpar_cep(cep)
     uf = ""
-    consulta = db.query(PartnerStore).outerjoin(CardProgram).outerjoin(PartnerNetwork)
+    consulta = db.query(PartnerStore, CardProgram).outerjoin(programa_unidades, programa_unidades.c.loja_id == PartnerStore.id).outerjoin(CardProgram, CardProgram.id == programa_unidades.c.programa_id).outerjoin(PartnerNetwork, PartnerNetwork.id == CardProgram.rede_id)
     consulta = consulta.filter(PartnerStore.ativo.is_(True))
     programa_ativo = (CardProgram.ativo.is_(True) & PartnerNetwork.ativo.is_(True))
     if modalidade == "LOJA_FISICA":
@@ -62,28 +62,38 @@ def pesquisar_lojas(cep, modalidade, latitude, longitude, busca, pagina, limite,
             uf = obter_uf_por_cep(cep_limpo)
         except ValueError as erro:
             raise HTTPException(400, str(erro)) from erro
-        consulta = consulta.filter(PartnerStore.estado == uf, or_(PartnerStore.programa_id.is_(None), programa_ativo & (CardProgram.modalidade == modalidade)))
+        consulta = consulta.filter(PartnerStore.estado == uf, or_(programa_unidades.c.programa_id.is_(None), programa_ativo & (CardProgram.modalidade == modalidade)))
     else:
         consulta = consulta.filter(programa_ativo, CardProgram.modalidade == modalidade)
     if busca.strip():
         termo = "%" + busca.strip() + "%"
         consulta = consulta.filter(or_(PartnerStore.nome.ilike(termo), PartnerStore.cidade.ilike(termo), PartnerNetwork.nome.ilike(termo), CardProgram.nome.ilike(termo)))
-    consulta = consulta.order_by(PartnerStore.cidade, PartnerStore.nome, PartnerStore.id)
+    consulta = consulta.order_by(PartnerStore.cidade, PartnerStore.nome, PartnerStore.id, CardProgram.id)
     total = consulta.count()
     inicio = (pagina - 1) * limite
     if latitude is None:
         lojas = consulta.offset(inicio).limit(limite).all()
-        resposta = [PartnerStoreResponse.model_validate(loja) for loja in lojas]
+        resposta = [resposta_loja(loja, programa) for loja, programa in lojas]
     else:
         resposta = []
-        for loja in consulta.all():
-            item = PartnerStoreResponse.model_validate(loja)
+        for loja, programa in consulta.all():
+            item = resposta_loja(loja, programa)
             if loja.latitude is not None and loja.longitude is not None:
                 item.distancia_km = distancia_km(latitude, longitude, loja.latitude, loja.longitude)
             resposta.append(item)
-        resposta.sort(key=lambda loja: (loja.distancia_km is None, loja.distancia_km or 0, loja.id))
+        resposta.sort(key=lambda loja: (loja.distancia_km is None, loja.distancia_km or 0, loja.id, loja.programa_id or 0))
         resposta = resposta[inicio:inicio + limite]
     return {"cep": cep_limpo, "uf": uf, "total": total, "pagina": pagina, "limite": limite, "lojas": resposta}
+
+
+def resposta_loja(loja, programa=None):
+    item = PartnerStoreResponse.model_validate(loja)
+    if programa:
+        item.programa_id = programa.id
+        item.programa_nome = programa.nome
+        item.rede_nome = programa.rede.nome
+        item.modalidade = programa.modalidade
+    return item
 
 
 def validar_administrador(token_recebido: str):
@@ -115,8 +125,10 @@ def cadastrar_loja_parceira(
         raise HTTPException(400, "CEP não pertence ao estado informado.")
     if (dados.latitude is None) != (dados.longitude is None):
         raise HTTPException(400, "Informe latitude e longitude juntas.")
-    validar_programa(dados.programa_id, db)
-    loja = PartnerStore(**dados.model_dump(), ativo=True)
+    programa = validar_programa(dados.programa_id, db)
+    loja = PartnerStore(**dados.model_dump(exclude={"programa_id"}), ativo=True)
+    if programa:
+        loja.programas.append(programa)
     db.add(loja)
     db.commit()
     db.refresh(loja)
@@ -147,6 +159,7 @@ def validar_programa(programa_id, db):
     programa = db.get(CardProgram, programa_id)
     if not programa or not programa.ativo or not programa.rede.ativo:
         raise HTTPException(400, "Programa de cartão inválido ou inativo.")
+    return programa
 
 
 @router.post("/redes", status_code=201)
@@ -200,14 +213,14 @@ def vincular_programa(loja_id: int, dados: StoreProgramUpdate, x_admin_token: st
     loja = db.get(PartnerStore, loja_id)
     if not loja:
         raise HTTPException(404, "Loja não encontrada.")
-    validar_programa(dados.programa_id, db)
+    programa = validar_programa(dados.programa_id, db)
     if (dados.latitude is None) != (dados.longitude is None):
         raise HTTPException(400, "Informe latitude e longitude juntas.")
-    if loja.programa_id is not None and loja.programa_id != dados.programa_id:
-        raise HTTPException(409, "O programa da unidade não pode ser substituído sem revisão dos pedidos.")
-    loja.programa_id = dados.programa_id
-    loja.latitude = dados.latitude
-    loja.longitude = dados.longitude
+    if programa and programa not in loja.programas:
+        loja.programas.append(programa)
+    if dados.latitude is not None:
+        loja.latitude = dados.latitude
+        loja.longitude = dados.longitude
     db.commit()
     db.refresh(loja)
-    return loja
+    return resposta_loja(loja, programa)

@@ -170,3 +170,20 @@ def test_programa_digital_sem_restricao_de_uf(cliente):
     assert busca.json()["lojas"][0]["id"] == loja["id"]
     payload = {"nome": "Pessoa Teste", "cpf": "98765432100", "email": "teste@example.com", "telefone": "12999998888", "cep": "20040020", "tipo_cartao": "LOJA_DIGITAL", "loja_id": loja["id"]}
     assert cliente.post("/solicitacoes/", json=payload).status_code == 201
+
+
+def test_unidade_pode_ter_dois_programas_distintos(cliente):
+    admin = {"x-admin-token": "senha-de-administrador-apenas-para-testes-123456789"}
+    rede = cliente.post("/lojas/redes", headers=admin, json={"nome": "Rede Multi"}).json()
+    programas = [cliente.post("/lojas/programas", headers=admin, json={"rede_id": rede["id"], "nome": nome, "modalidade": "LOJA_FISICA"}).json()["id"] for nome in ["Cartão A", "Cartão B"]]
+    loja = cliente.post("/lojas/parceiras", headers=admin, json={"nome": "Unidade Multi", "estado": "SP", "cidade": "São José dos Campos", "endereco": "Rua Exemplo", "cep": "12210000", "programa_id": programas[0]}).json()
+    vinculo = cliente.put(f"/lojas/parceiras/{loja['id']}/programa", headers=admin, json={"programa_id": programas[1]})
+    assert vinculo.status_code == 200, vinculo.text
+    assert set(vinculo.json()["programas_ids"]) == set(programas)
+    busca = cliente.get("/lojas/parceiras", params={"cep": "12210000", "busca": "Rede Multi"})
+    assert busca.json()["total"] == 2
+    payload = {"nome": "Pessoa Teste", "cpf": "98765432100", "email": "multi@example.com", "telefone": "12999998888", "cep": "12210000", "tipo_cartao": "LOJA_FISICA", "loja_id": loja["id"]}
+    assert cliente.post("/solicitacoes/", json=payload).status_code == 400
+    for programa in programas:
+        assert cliente.post("/solicitacoes/", json={**payload, "programa_id": programa}).status_code == 201
+    assert cliente.post("/solicitacoes/", json={**payload, "programa_id": programas[0]}).status_code == 409

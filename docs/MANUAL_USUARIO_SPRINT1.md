@@ -8,6 +8,6 @@
 6. Se já houver pedido aprovado ou em análise para o mesmo programa, acompanhe o pedido anterior em vez de criar outro.
 7. Se reprovado, pode optar por receber informações sobre outros produtos, confirmando o interesse por e-mail.
 
-Admin: entre em admin-parceiros.html, informe o token administrativo, cadastre uma rede e seu programa ou selecione um programa existente, cadastre as unidades e informe as coordenadas verificadas quando disponíveis. Atribua uma conta ao responsável. Cada unidade tem um programa ou funciona como independente. A rede pode ter vários programas; compartilhar a rede não implica compartilhar o cartão. O portal parceiro permite gerenciar atendentes da unidade.
+Admin: entre em admin-parceiros.html, informe o token administrativo, cadastre uma rede e seu programa ou selecione um programa existente, cadastre as unidades e informe as coordenadas verificadas quando disponíveis. Atribua uma conta ao responsável. Uma unidade pode participar de vários programas ou funcionar como independente. Use Atualizar unidade para adicionar outros programas. A rede pode ter vários programas; compartilhar a rede não implica compartilhar o cartão. O portal parceiro permite gerenciar atendentes da unidade.
 
 Ambiente acadêmico: redes, lojas e bases de aprovação de demonstração são fictícias; as distâncias dos exemplos também são ilustrativas.

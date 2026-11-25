@@ -11,7 +11,7 @@ Swagger interativo: http://localhost:8000/docs
 | POST | /lojas/redes | Criar rede (x-admin-token) |
 | POST | /lojas/programas | Criar programa (x-admin-token) |
 | POST | /lojas/parceiras | Criar unidade (x-admin-token) |
-| PUT | /lojas/parceiras/{id}/programa | Vincular programa e coordenadas (x-admin-token) |
+| PUT | /lojas/parceiras/{id}/programa | Adicionar programa ou coordenadas (x-admin-token) |
 | POST | /solicitacoes/ | Captação e código privado |
 | POST | /solicitacoes/consultar | CPF e código privado |
 | GET | /solicitacoes/{id} | Protocolo; cabeçalhos X-CPF e X-Codigo-Consulta |

@@ -46,7 +46,7 @@ try {
   const unidade = lojas.lojas.find(l => l.nome.includes("Aquarius"));
   const outra = lojas.lojas.find(l => l.id !== unidade.id && l.programa_id === unidade.programa_id);
   assert.ok(outra);
-  await pagina.locator("#loja-id").selectOption(String(unidade.id));
+  await pagina.locator("#loja-id").selectOption(String(unidade.id) + ':' + unidade.programa_id);
   await pagina.locator("#contribuidores-box").getByText("sem atribuição", { exact: false }).waitFor();
   await pagina.locator("#enviar-solicitacao").click();
   await pagina.locator('#passo-3 [data-status="EM_ANALISE"]').waitFor();

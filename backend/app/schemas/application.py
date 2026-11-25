@@ -13,6 +13,7 @@ class ApplicationCreate(BaseModel):
     tipo_cartao: Literal["DM", "LOJA_FISICA", "LOJA_DIGITAL"]
     loja_id: int | None = Field(default=None, gt=0)
     contribuidor_id: int | None = Field(default=None, gt=0)
+    programa_id: int | None = Field(default=None, gt=0)
 
     model_config = ConfigDict(extra="forbid")
 
