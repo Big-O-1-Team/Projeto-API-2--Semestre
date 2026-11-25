@@ -176,7 +176,7 @@ const PassoDois = {
       } else {
         resposta = await apiRequest("/lojas/parceiras?" + new URLSearchParams(params));
       }
-      if (pedido !== this.buscaAtual || !box.isConnected || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
+      if (pedido !== this.buscaAtual || !box.isConnected || document.getElementById("passo-2").hidden || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
       box.replaceChildren();
       const resumo = document.createElement("p");
       resumo.textContent = resposta.total + " opção(ões) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");

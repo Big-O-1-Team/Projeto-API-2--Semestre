@@ -213,3 +213,5 @@
 .mapa-selecionar { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 0; border-radius: 6px; background: #2536aa; color: white; cursor: pointer; font-size: 12px; }
 .mapa-aviso { min-height: 0; }
 @media (max-width: 480px) { #mapa-lojas { height: 260px; } }
+
+#mapa-lojas .mapa-pin--usuario { pointer-events: none; }

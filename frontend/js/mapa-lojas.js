@@ -43,9 +43,9 @@ const MapaLojas = {
       const ponto = [localizacao.latitude, localizacao.longitude];
       coordenadas.push(ponto);
       L.marker(ponto, {
-        icon: L.divIcon({className: "mapa-pin mapa-pin--usuario", html: '<span aria-hidden="true">●</span>', iconSize: [30, 30], iconAnchor: [15, 15]}),
-        title: "Você está aqui", alt: "Você está aqui", zIndexOffset: 1000
-      }).addTo(instancia).bindTooltip("Você está aqui", {direction: "top"});
+        icon: L.divIcon({className: "mapa-pin mapa-pin--usuario", html: '<span aria-hidden="true">●</span>', iconSize: [30, 30], iconAnchor: [15, 34]}),
+        title: "Você está aqui", alt: "Você está aqui", zIndexOffset: 1000, interactive: false, keyboard: false
+      }).addTo(instancia).bindTooltip("Você está aqui", {direction: "top", permanent: true, offset: [0, -32]});
     }
 
     const unidades = new Map();
