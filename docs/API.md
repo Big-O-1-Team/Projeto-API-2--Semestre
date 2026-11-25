@@ -8,6 +8,7 @@ Swagger interativo: http://localhost:8000/docs
 | GET | /lojas/parceiras | Busca por CEP, modalidade, texto e paginação |
 | POST | /lojas/buscar | Busca com localização no corpo da requisição |
 | GET | /lojas/programas | Programas ativos |
+| GET | /lojas/redes | Redes ativas |
 | POST | /lojas/redes | Criar rede (x-admin-token) |
 | POST | /lojas/programas | Criar programa (x-admin-token) |
 | POST | /lojas/parceiras | Criar unidade (x-admin-token) |

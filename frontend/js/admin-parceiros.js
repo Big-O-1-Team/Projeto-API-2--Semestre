@@ -113,6 +113,16 @@ formularioConta.addEventListener("submit", async (evento) => {
   }
 });
 
+async function carregarRedes() {
+  const resposta = await fetch(API_URL + "/lojas/redes");
+  if (!resposta.ok) throw new Error("Não foi possível consultar as redes.");
+  const redes = await resposta.json();
+  const seletor = document.getElementById("rede-id");
+  const selecionada = seletor.value;
+  seletor.replaceChildren(new Option("Criar nova rede", ""));
+  redes.forEach(r => seletor.append(new Option(r.nome, r.id)));
+  seletor.value = selecionada;
+}
 async function carregarProgramas() {
   const resposta = await fetch(API_URL + "/lojas/programas");
   if (!resposta.ok) throw new Error("Não foi possível consultar os programas.");
@@ -134,7 +144,9 @@ document.getElementById("programa-form").addEventListener("submit", async evento
     if (!id) {
       const rede = await requisitarAdmin("/lojas/redes", { nome: document.getElementById("rede-nome").value.trim() });
       id = rede.id;
+      await carregarRedes();
       document.getElementById("rede-id").value = id;
+      document.getElementById("rede-nome").value = "";
     }
     const p = await requisitarAdmin("/lojas/programas", { rede_id: id, nome: document.getElementById("programa-nome").value.trim(), modalidade: document.getElementById("programa-modalidade").value });
     await carregarProgramas();
@@ -146,7 +158,8 @@ document.getElementById("programa-form").addEventListener("submit", async evento
     botao.disabled = false;
   }
 });
-carregarProgramas().catch(() => {});
+carregarProgramas().catch(e => apresentarMensagem(e.message));
+carregarRedes().catch(e => apresentarMensagem(e.message));
 
 document.getElementById("vinculo-form").addEventListener("submit", async evento => {
   evento.preventDefault();

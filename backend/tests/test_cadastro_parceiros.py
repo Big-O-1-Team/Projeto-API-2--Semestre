@@ -175,6 +175,7 @@ def test_programa_digital_sem_restricao_de_uf(cliente):
 def test_unidade_pode_ter_dois_programas_distintos(cliente):
     admin = {"x-admin-token": "senha-de-administrador-apenas-para-testes-123456789"}
     rede = cliente.post("/lojas/redes", headers=admin, json={"nome": "Rede Multi"}).json()
+    assert rede in cliente.get("/lojas/redes").json()
     programas = [cliente.post("/lojas/programas", headers=admin, json={"rede_id": rede["id"], "nome": nome, "modalidade": "LOJA_FISICA"}).json()["id"] for nome in ["Cartão A", "Cartão B"]]
     loja = cliente.post("/lojas/parceiras", headers=admin, json={"nome": "Unidade Multi", "estado": "SP", "cidade": "São José dos Campos", "endereco": "Rua Exemplo", "cep": "12210000", "programa_id": programas[0]}).json()
     vinculo = cliente.put(f"/lojas/parceiras/{loja['id']}/programa", headers=admin, json={"programa_id": programas[1]})

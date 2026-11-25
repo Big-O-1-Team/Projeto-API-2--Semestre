@@ -16,3 +16,7 @@
 .painel-principal--admin .mensagem { min-height: 0; }
 @media (max-width: 960px) { .pagina--admin { grid-template-columns: 1fr; } }
 @media (max-width: 540px) { .admin-grid { grid-template-columns: 1fr; } .admin-grid__completo { grid-column: auto; } }
+
+#programa-form, #vinculo-form, #loja-form { margin-top: 24px; }
+#programa-form, #vinculo-form { padding-bottom: 24px; border-bottom: 1px solid #dce1ec; }
+#programa-form .btn-primario, #vinculo-form .btn-primario { margin-top: 12px; }

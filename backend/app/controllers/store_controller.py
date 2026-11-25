@@ -163,6 +163,12 @@ def validar_programa(programa_id, db):
     return programa
 
 
+@router.get("/redes")
+def listar_redes(db: Session = Depends(get_db)):
+    redes = db.query(PartnerNetwork).filter(PartnerNetwork.ativo.is_(True)).order_by(PartnerNetwork.nome).all()
+    return [{"id": rede.id, "nome": rede.nome} for rede in redes]
+
+
 @router.post("/redes", status_code=201)
 def cadastrar_rede(dados: NetworkCreate, x_admin_token: str = Header(default=""), db: Session = Depends(get_db)):
     validar_administrador(x_admin_token)
@@ -205,7 +211,7 @@ def cadastrar_programa(dados: ProgramCreate, x_admin_token: str = Header(default
 @router.get("/programas")
 def listar_programas(db: Session = Depends(get_db)):
     programas = db.query(CardProgram).join(PartnerNetwork).filter(CardProgram.ativo.is_(True), PartnerNetwork.ativo.is_(True)).order_by(PartnerNetwork.nome, CardProgram.nome).all()
-    return [{"id": p.id, "nome": p.nome, "rede": p.rede.nome, "modalidade": p.modalidade} for p in programas]
+    return [{"id": p.id, "nome": p.nome, "rede": p.rede.nome, "rede_id": p.rede_id, "modalidade": p.modalidade} for p in programas]
 
 
 @router.put("/parceiras/{loja_id}/programa", response_model=PartnerStoreResponse)
