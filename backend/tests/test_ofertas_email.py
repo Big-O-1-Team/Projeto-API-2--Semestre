@@ -49,7 +49,7 @@ def ambiente(monkeypatch):
     engine.dispose()
 
 
-def solicitar(cliente, cpf="12345678909", tipo="LOJA_DIGITAL"):
+def solicitar(cliente, cpf="12345678909", tipo="LOJA_DIGITAL", aceita_ofertas=False):
     resposta = cliente.post("/solicitacoes/", json={
         "nome": "Pessoa de Teste",
         "cpf": cpf,
@@ -57,6 +57,7 @@ def solicitar(cliente, cpf="12345678909", tipo="LOJA_DIGITAL"):
         "telefone": "12999998888",
         "cep": "12210000",
         "tipo_cartao": tipo,
+        "aceita_ofertas": aceita_ofertas,
         "loja_id": 1 if tipo == "LOJA_DIGITAL" else None,
     })
     assert resposta.status_code == 201, resposta.text
@@ -125,3 +126,42 @@ def test_sem_smtp_nao_simula_email_enviado(ambiente, monkeypatch):
         registro = db.query(OfferInterest).one()
         assert registro.enviado_em is None
         assert registro.confirmado_em is None
+
+
+def test_envio_automatico_reprovado_com_consentimento(ambiente, monkeypatch):
+    cliente, sessao = ambiente
+    enviados = []
+    monkeypatch.setattr(offer_controller, "enviar_confirmacao", lambda email, token: enviados.append((email, token)) or True)
+    pedido = solicitar(cliente, aceita_ofertas=True)
+    assert pedido["status"] == "REPROVADO"
+    assert pedido["situacao_oferta"] == "AGUARDANDO_CONFIRMACAO"
+    assert len(enviados) == 1
+    assert enviados[0][0] == "pessoa@example.com"
+    assert interesse(cliente, pedido).json()["situacao"] == "AGUARDANDO_CONFIRMACAO"
+    assert len(enviados) == 1
+    with sessao() as db:
+        assert db.query(OfferInterest).one().enviado_em is not None
+
+
+def test_nao_envia_sem_consentimento_ou_sem_reprovacao(ambiente, monkeypatch):
+    cliente, sessao = ambiente
+    enviados = []
+    monkeypatch.setattr(offer_controller, "enviar_confirmacao", lambda email, token: enviados.append(email) or True)
+    assert solicitar(cliente)["situacao_oferta"] is None
+    assert solicitar(cliente, tipo="DM", aceita_ofertas=True)["situacao_oferta"] is None
+    assert enviados == []
+    with sessao() as db:
+        assert db.query(OfferInterest).count() == 0
+
+
+def test_falha_smtp_preserva_pedido_e_permite_tentar_novamente(ambiente, monkeypatch):
+    cliente, sessao = ambiente
+    monkeypatch.setattr(offer_controller, "enviar_confirmacao", lambda email, token: False)
+    pedido = solicitar(cliente, aceita_ofertas=True)
+    assert pedido["status"] == "REPROVADO"
+    assert pedido["situacao_oferta"] == "PENDENTE_ENVIO"
+    with sessao() as db:
+        assert db.query(Application).count() == 1
+        assert db.query(OfferInterest).one().enviado_em is None
+    monkeypatch.setattr(offer_controller, "enviar_confirmacao", lambda email, token: True)
+    assert interesse(cliente, pedido).json()["situacao"] == "AGUARDANDO_CONFIRMACAO"

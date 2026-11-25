@@ -14,6 +14,7 @@ class ApplicationCreate(BaseModel):
     loja_id: int | None = Field(default=None, gt=0)
     contribuidor_id: int | None = Field(default=None, gt=0)
     programa_id: int | None = Field(default=None, gt=0)
+    aceita_ofertas: bool = False
 
     model_config = ConfigDict(extra="forbid")
 
@@ -43,6 +44,7 @@ class ApplicationResponse(BaseModel):
 
 class ApplicationCreated(ApplicationResponse):
     codigo_consulta: str
+    situacao_oferta: str | None = None
 
 
 class ConsultaCpf(BaseModel):

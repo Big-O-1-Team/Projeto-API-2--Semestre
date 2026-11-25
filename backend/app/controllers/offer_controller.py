@@ -65,14 +65,18 @@ def registrar_interesse(
     if registro is None:
         raise HTTPException(status_code=404, detail="Solicitação reprovada não encontrada para os dados informados.")
 
+    return enviar_oferta(db, dados.solicitacao_id, str(dados.email))
+
+
+def enviar_oferta(db: Session, solicitacao_id: int, email: str):
     interesse = db.query(OfferInterest).filter(
-        OfferInterest.solicitacao_id == dados.solicitacao_id
+        OfferInterest.solicitacao_id == solicitacao_id
     ).first()
 
     if interesse is None:
         interesse = OfferInterest(
-            solicitacao_id=dados.solicitacao_id,
-            email=str(dados.email),
+            solicitacao_id=solicitacao_id,
+            email=email,
         )
         db.add(interesse)
         try:
@@ -81,12 +85,12 @@ def registrar_interesse(
         except IntegrityError:
             db.rollback()
             interesse = db.query(OfferInterest).filter(
-                OfferInterest.solicitacao_id == dados.solicitacao_id
+                OfferInterest.solicitacao_id == solicitacao_id
             ).first()
             if interesse is None:
                 raise
 
-    interesse = db.query(OfferInterest).filter(OfferInterest.solicitacao_id == dados.solicitacao_id).with_for_update().populate_existing().first()
+    interesse = db.query(OfferInterest).filter(OfferInterest.solicitacao_id == solicitacao_id).with_for_update().populate_existing().first()
     if interesse.confirmado_em is not None:
         return {"situacao": "CONFIRMADO", "mensagem": "Seu interesse já está confirmado."}
     if interesse.enviado_em is not None:

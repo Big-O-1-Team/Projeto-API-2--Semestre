@@ -53,6 +53,10 @@ const PassoDois = {
             </div>
           ` : ""}
         </div>
+        <label class="ofertas__check">
+          <input type="checkbox" id="autorizar-ofertas" name="aceita_ofertas">
+          <span>Se meu pedido for reprovado, aceito receber outras ofertas por e-mail (opcional).</span>
+        </label>
         <div class="acoes-passo">
           <button type="button" class="btn-secundario" id="voltar-passo-1">Voltar</button>
           <button type="submit" class="btn-primario" id="enviar-solicitacao">Enviar solicitação</button>
@@ -289,6 +293,7 @@ const PassoDois = {
       nome: String(dadosForm.get("nome") || "").trim(),
       cpf: apenasNumeros(dadosForm.get("cpf")),
       email: String(dadosForm.get("email") || "").trim(),
+      aceita_ofertas: dadosForm.has("aceita_ofertas"),
       telefone: apenasNumeros(dadosForm.get("telefone")),
       cep: apenasNumeros(dadosForm.get("cep")),
       tipo_cartao: AppState.tipoCartao,

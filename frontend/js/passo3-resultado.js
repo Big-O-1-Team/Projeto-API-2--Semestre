@@ -31,15 +31,17 @@ const PassoTres = {
       '<button type="button" class="btn-secundario" id="consultar-solicitacao">Acompanhar solicitação</button>',
       '<button type="button" class="btn-primario" id="nova-solicitacao">Fazer nova solicitação</button>',
       '</div></div>',
-      '<section class="ofertas" aria-labelledby="ofertas-titulo">',
-      '<h3 id="ofertas-titulo">Outras opções da DM</h3>',
-      '<p class="ofertas__intro">Disponibilidade sujeita à análise.</p>',
-      '<div class="ofertas__grade">',
-      '<article class="ofertas__card"><span class="ofertas__icone" aria-hidden="true">✦</span><h4>Empréstimo pessoal</h4><p>Uma alternativa de crédito para conhecer e avaliar conforme as condições disponíveis.</p><span>Disponibilidade sujeita à análise</span></article>',
-      '<article class="ofertas__card"><span class="ofertas__icone" aria-hidden="true">↗</span><h4>DMCred</h4><p>Outras soluções de crédito que podem atender necessidades diferentes.</p><span>Disponibilidade sujeita à análise</span></article>',
-      '</div></section>',
-      reprovado
-        ? '<form id="interesse-ofertas-form" class="ofertas__consentimento"><p>Confirme seu interesse pelo link enviado por e-mail.</p><label class="ofertas__check"><input id="aceitar-ofertas" type="checkbox" required><span>Quero receber por e-mail informações sobre outras opções e ofertas da DM.</span></label><button class="btn-primario" id="enviar-interesse-ofertas" type="submit">Quero receber informações</button><p class="ofertas__retorno" id="resultado-interesse-ofertas" role="status" aria-live="polite"></p></form>'
+      reprovado ? '<section class="ofertas" aria-labelledby="ofertas-titulo">' : "",
+      reprovado ? '<h3 id="ofertas-titulo">Outras opções da DM</h3>' : "",
+      reprovado ? '<p class="ofertas__intro">Disponibilidade sujeita à análise.</p>' : "",
+      reprovado ? '<div class="ofertas__grade">' : "",
+      reprovado ? '<article class="ofertas__card"><span class="ofertas__icone" aria-hidden="true">✦</span><h4>Empréstimo pessoal</h4><p>Uma alternativa de crédito para conhecer e avaliar conforme as condições disponíveis.</p><span>Disponibilidade sujeita à análise</span></article>' : "",
+      reprovado ? '<article class="ofertas__card"><span class="ofertas__icone" aria-hidden="true">↗</span><h4>DMCred</h4><p>Outras soluções de crédito que podem atender necessidades diferentes.</p><span>Disponibilidade sujeita à análise</span></article>' : "",
+      reprovado ? '</div></section>' : "",
+      reprovado && solicitacao.situacao_oferta === "AGUARDANDO_CONFIRMACAO"
+        ? '<p class="ofertas__retorno" id="resultado-interesse-ofertas" data-situacao="AGUARDANDO_CONFIRMACAO" role="status">Enviamos outras ofertas para seu e-mail.</p>'
+        : reprovado
+        ? '<form id="interesse-ofertas-form" class="ofertas__consentimento"><p>Receba outras opções por e-mail.</p><label class="ofertas__check"><input id="aceitar-ofertas" type="checkbox" required><span>Quero receber por e-mail informações sobre outras opções e ofertas da DM.</span></label><button class="btn-primario" id="enviar-interesse-ofertas" type="submit">Quero receber informações</button><p class="ofertas__retorno" id="resultado-interesse-ofertas" role="status" aria-live="polite"></p></form>'
         : ''
     ].join("");
 

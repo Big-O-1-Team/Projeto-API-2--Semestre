@@ -19,7 +19,7 @@ Parceiro: http://localhost:5173/parceiro.html
 
 Para testar aprovação fictícia de não colaboradores, configure DEMO_PRE_QUALIFICACAO=1 e PRE_QUALIFICADOS_FICTICIOS como JSON com CPF de teste e lista de modalidades. Por padrão essa aprovação está desativada. Não use dados reais.
 
-SMTP exige SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM e PUBLIC_API_URL acessível. Sem SMTP, o sistema não afirma que enviou e-mail. Localização exige HTTPS ou localhost e consentimento do navegador. O ViaCEP precisa estar acessível para validar o CEP informado. Nos testes automatizados, CEP_API_BASE_URL aponta para um serviço simulado.
+Mailpit inicia automaticamente no Docker: http://localhost:8025. Em SMTP_MODE=mailpit (padrão), os e-mails ficam na caixa de testes e não são entregues externamente. O link usa PUBLIC_API_URL ou http://localhost:5173/api. SMTP_MODE=smtp habilita um servidor real somente se SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM e PUBLIC_API_URL estiverem configurados. Não habilite SMTP real com dados fictícios. Localização exige HTTPS ou localhost e consentimento do navegador. O ViaCEP precisa estar acessível para validar o CEP informado. Nos testes automatizados, CEP_API_BASE_URL aponta para um serviço simulado.
 
 ```bash
 docker compose down

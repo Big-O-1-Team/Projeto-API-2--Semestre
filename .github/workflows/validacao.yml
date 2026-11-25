@@ -109,6 +109,38 @@ jobs:
           curl --fail --silent --show-error http://localhost:5173/js/api-config.js | grep -F '"/api"'
           curl --fail --silent --show-error http://localhost:5173/api/cartoes/ | python -c 'import json,sys; assert {c["tipo"] for c in json.load(sys.stdin)} == {"DM","LOJA_FISICA","LOJA_DIGITAL"}'
           curl --fail --silent --show-error http://localhost:8000/cartoes/ | python -c 'import json,sys; assert len(json.load(sys.stdin)) == 3'
+      - name: Testar entrega SMTP no Mailpit
+        run: |
+          docker compose exec -T backend python - <<'PY'
+          from app.main import app
+          from app.controllers import application_controller
+          from app.schemas.application import ApplicationCreate
+          from app.database import SessionLocal
+          application_controller.obter_uf_por_cep = lambda cep: "SP"
+          from app.models.partner_store import PartnerStore
+          with SessionLocal() as db:
+              loja = next(l for l in db.query(PartnerStore).all() if l.modalidade == "LOJA_DIGITAL")
+              dados = ApplicationCreate(nome="Pessoa Teste", cpf="32376226643", email="teste-mailpit@example.com", telefone="12999998888", cep="12210000", tipo_cartao="LOJA_DIGITAL", loja_id=loja.id, aceita_ofertas=True)
+              resposta = application_controller.criar_solicitacao(dados, db)
+              assert resposta["status"] == "REPROVADO", resposta
+              assert resposta["situacao_oferta"] == "AGUARDANDO_CONFIRMACAO", resposta
+          PY
+          python - <<'PY'
+          import json, urllib.request
+          base = "http://127.0.0.1:8025"
+          with urllib.request.urlopen(base + "/api/v1/messages") as r:
+              mensagens = json.load(r)["messages"]
+          assert len(mensagens) == 1, mensagens
+          assert mensagens[0]["To"][0]["Address"] == "teste-mailpit@example.com"
+          with urllib.request.urlopen(base + "/api/v1/message/" + mensagens[0]["ID"]) as r:
+              mensagem = json.load(r)
+          assert "DMCred" in mensagem["Text"] and "Empréstimo pessoal" in mensagem["Text"]
+          import re
+          link = re.search(r"http://localhost:5173/api/ofertas/confirmar\?token=\S+", mensagem["Text"]).group()
+          with urllib.request.urlopen(link) as r:
+              assert "Interesse confirmado" in r.read().decode()
+          print("E-mail recebido no Mailpit e interesse confirmado.")
+          PY
       - name: Diagnóstico
         if: always()
         run: |

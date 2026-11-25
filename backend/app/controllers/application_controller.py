@@ -2,6 +2,7 @@
 import re
 import hashlib
 import secrets
+import logging
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy import or_
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
@@ -17,6 +18,9 @@ from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import modalidade_autorizada
 from app.services.qualificacao_service import cpf_valido, pre_qualificado
 from app.controllers.store_controller import validar_administrador
+from app.controllers.offer_controller import enviar_oferta
+from app.models.offer_interest import OfferInterest
+from sqlalchemy.exc import SQLAlchemyError
 from app.middleware.rate_limit import verificar_limite_consulta
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
@@ -141,10 +145,23 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
             status=status_solicitacao
         )
         db.add(nova_solicitacao)
+        db.flush()
+        enviar_alternativas = status_solicitacao == "REPROVADO" and solicitacao.aceita_ofertas
+        if enviar_alternativas:
+            db.add(OfferInterest(solicitacao_id=nova_solicitacao.id, email=str(solicitacao.email)))
         db.commit()
         db.refresh(nova_solicitacao)
         resposta = ApplicationResponse.model_validate(nova_solicitacao).model_dump()
-        return {**resposta, "codigo_consulta": codigo}
+        resultado = {**resposta, "codigo_consulta": codigo, "situacao_oferta": None}
+        if enviar_alternativas:
+            try:
+                oferta = enviar_oferta(db, nova_solicitacao.id, str(solicitacao.email))
+                resultado["situacao_oferta"] = oferta["situacao"]
+            except SQLAlchemyError:
+                db.rollback()
+                logging.getLogger(__name__).exception("Não foi possível concluir o envio de ofertas.")
+                resultado["situacao_oferta"] = "PENDENTE_ENVIO"
+        return resultado
     except IntegrityError as erro:
         db.rollback()
         raise HTTPException(409, "Cadastro ou solicitação já existente.") from erro
