@@ -35,12 +35,18 @@ class ApplicationResponse(BaseModel):
     status: str
     criado_em: datetime
     contribuidor_id: int | None
+    programa_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class ApplicationCreated(ApplicationResponse):
+    codigo_consulta: str
+
+
 class ConsultaCpf(BaseModel):
     cpf: str = Field(min_length=11, max_length=14)
+    codigo: str = Field(min_length=20, max_length=120)
 
     model_config = ConfigDict(extra="forbid")
 

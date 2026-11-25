@@ -81,6 +81,28 @@ if not indice_existente:
             """
         ))
 
+def adicionar_coluna(tabela, coluna, definicao):
+    if coluna not in {c["name"] for c in inspect(engine).get_columns(tabela)}:
+        with engine.begin() as conexao:
+            conexao.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}"))
+
+
+for tabela, coluna, definicao in [
+    ("estabelecimentos_parceiros", "programa_id", "INTEGER NULL REFERENCES programas_cartao(id)"),
+    ("estabelecimentos_parceiros", "latitude", "FLOAT NULL"),
+    ("estabelecimentos_parceiros", "longitude", "FLOAT NULL"),
+    ("solicitacoes", "programa_id", "INTEGER NULL REFERENCES programas_cartao(id)"),
+    ("solicitacoes", "chave_ativa", "VARCHAR(120) NULL"),
+    ("solicitacoes", "codigo_consulta_hash", "VARCHAR(64) NULL"),
+]:
+    adicionar_coluna(tabela, coluna, definicao)
+
+for coluna in ("chave_ativa", "codigo_consulta_hash"):
+    indices = inspect(engine).get_indexes("solicitacoes") + inspect(engine).get_unique_constraints("solicitacoes")
+    if not any(indice.get("unique", True) and indice.get("column_names") == [coluna] for indice in indices):
+        with engine.begin() as conexao:
+            conexao.execute(text(f"CREATE UNIQUE INDEX uq_solicitacoes_{coluna} ON solicitacoes ({coluna})"))
+
 seed_database()
 
 app = FastAPI(title="DM Card API", version="2.0.0")

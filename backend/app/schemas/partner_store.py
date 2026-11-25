@@ -10,6 +10,13 @@ class PartnerStoreResponse(BaseModel):
     cep: str
     emite_cartao_credito: bool
     role: str
+    programa_id: int | None = None
+    rede_nome: str | None = None
+    programa_nome: str | None = None
+    modalidade: str = "LOJA_FISICA"
+    latitude: float | None = None
+    longitude: float | None = None
+    distancia_km: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,6 +25,8 @@ class PartnerStoreSearchResponse(BaseModel):
     cep: str
     uf: str
     total: int
+    pagina: int = 1
+    limite: int = 50
     lojas: list[PartnerStoreResponse]
 
 
@@ -35,6 +44,9 @@ class PartnerStoreCreate(BaseModel):
     endereco: str = Field(min_length=5, max_length=180)
     cep: str = Field(min_length=8, max_length=9)
     emite_cartao_credito: bool = False
+    programa_id: int | None = Field(default=None, gt=0)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
 
     @field_validator("nome", "cidade", "endereco")
     @classmethod
@@ -59,3 +71,21 @@ class PartnerStoreCreate(BaseModel):
         if len(cep) != 8:
             raise ValueError("Informe um CEP com 8 números.")
         return cep
+
+from typing import Literal
+
+
+class NetworkCreate(BaseModel):
+    nome: str = Field(min_length=2, max_length=120)
+
+
+class ProgramCreate(BaseModel):
+    rede_id: int = Field(gt=0)
+    nome: str = Field(min_length=2, max_length=120)
+    modalidade: Literal["LOJA_FISICA", "LOJA_DIGITAL"]
+
+
+class StoreProgramUpdate(BaseModel):
+    programa_id: int | None = Field(default=None, gt=0)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
