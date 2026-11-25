@@ -92,3 +92,26 @@ jobs:
             demonstracao/
             /tmp/api.log
           if-no-files-found: warn
+
+  docker-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar ambiente descartável
+        run: |
+          cp .env.example .env
+          sed -i "s/^AUTH_SECRET=.*/AUTH_SECRET=$(openssl rand -hex 32)/" .env
+          sed -i "s/^ADMIN_TOKEN=.*/ADMIN_TOKEN=$(openssl rand -hex 32)/" .env
+      - name: Subir imagens reais
+        run: docker compose up --build -d --wait --wait-timeout 180
+      - name: Verificar API pelo frontend
+        run: |
+          curl --fail --silent --show-error http://localhost:5173/js/api-config.js | grep -F '"/api"'
+          curl --fail --silent --show-error http://localhost:5173/api/cartoes/ | python -c 'import json,sys; assert {c["tipo"] for c in json.load(sys.stdin)} == {"DM","LOJA_FISICA","LOJA_DIGITAL"}'
+          curl --fail --silent --show-error http://localhost:8000/cartoes/ | python -c 'import json,sys; assert len(json.load(sys.stdin)) == 3'
+      - name: Diagnóstico
+        if: always()
+        run: |
+          docker compose ps
+          docker compose logs --tail=80
+          docker compose down -v

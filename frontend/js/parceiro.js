@@ -1,4 +1,4 @@
-const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
+const API_URL = window.DM_API_URL ?? `${window.location.protocol}//${window.location.hostname}:8000`;
 let tokenParceiro = sessionStorage.getItem("token-parceiro");
 
 const elementos = {

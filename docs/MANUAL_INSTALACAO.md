@@ -26,3 +26,5 @@ docker compose down
 ```
 
 Não use down -v em banco com dados a preservar. Faça backup antes da migração de uma instalação existente. Solicitações legadas não têm código privado. Após verificar a identidade do titular por canal seguro, um administrador pode gerar um novo código em POST /solicitacoes/{id}/codigo (invalida o anterior).
+
+Se o catálogo não carregar, verifique `docker compose ps` e `docker compose logs --tail=100 backend mysql`. O frontend Docker encaminha as requisições `/api/` ao backend pela rede interna. O frontend só apresenta cartões retornados pelo banco. Ao atualizar a dependência PyMySQL, execute `docker compose up -d --build` sem apagar volumes.

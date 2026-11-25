@@ -200,3 +200,6 @@
 #filtro-parceiros { margin-bottom: 8px; }
 #filtrar-parceiros, #usar-localizacao { margin: 4px 0; }
 .lojas-box select { width: 100%; max-width: 100%; }
+
+.formulario__cabecalho h2 { margin-top: 0; }
+.consulta-status__texto h2 { margin-top: 0; }

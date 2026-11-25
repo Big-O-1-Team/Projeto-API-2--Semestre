@@ -1,4 +1,4 @@
-const API_URL = window.location.protocol + "//" + window.location.hostname + ":8000";
+const API_URL = window.DM_API_URL ?? `${window.location.protocol}//${window.location.hostname}:8000`;
 const formularioLoja = document.getElementById("loja-form");
 const formularioConta = document.getElementById("conta-form");
 const aviso = document.getElementById("admin-mensagem");

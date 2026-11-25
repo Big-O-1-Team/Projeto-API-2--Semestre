@@ -1,21 +1,26 @@
 const PassoUm = {
-  cartoesFallback: [
-    { tipo: "DM", nome: "Cartão DM", descricao: "Inicie sua solicitação do Cartão DM." },
-    { tipo: "LOJA_FISICA", nome: "Cartão Loja Física", descricao: "Escolha uma loja parceira disponível no seu estado." },
-    { tipo: "LOJA_DIGITAL", nome: "Cartão Loja Digital", descricao: "Solicitação de qualquer estado, sem emissão de cartão físico." }
-  ],
-
   async init() {
-    let cartoes = this.cartoesFallback;
-
+    const passo = document.getElementById("passo-1");
+    if (!passo) return;
+    passo.textContent = "Carregando cartões...";
+    esconderMensagem();
     try {
-      const resposta = await apiRequest("/cartoes/");
-      if (Array.isArray(resposta) && resposta.length) cartoes = resposta;
+      const cartoes = await apiRequest("/cartoes/");
+      if (!Array.isArray(cartoes) || !cartoes.length) {
+        throw new Error("Nenhum cartão disponível.");
+      }
+      this.render(cartoes);
     } catch (_) {
-      mostrarMensagem("Não foi possível carregar os cartões da API. As opções locais foram exibidas para continuar a demonstração.");
+      passo.replaceChildren();
+      const mensagem = document.createElement("p");
+      mensagem.textContent = "Não foi possível carregar os cartões.";
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "btn-secundario";
+      botao.textContent = "Tentar novamente";
+      botao.addEventListener("click", () => this.init());
+      passo.append(mensagem, botao);
     }
-
-    this.render(cartoes);
   },
 
   render(cartoes) {
@@ -24,7 +29,7 @@ const PassoUm = {
 
     passo.innerHTML = `
       <h3 class="passo__titulo">Qual cartão você procura?</h3>
-      <p class="passo__descricao">Escolha uma opção para continuar.</p>
+      
       <div class="cartoes-grid">
         ${cartoes.map((cartao) => `
           <button type="button" class="cartao-opcao" data-tipo-cartao="${escaparHtml(cartao.tipo)}">

@@ -58,3 +58,14 @@ test("backend mantém consulta por CPF e aprovação por modalidade", () => {
   assert.ok(backend.includes('tipo_cartao == "DM"'));
   assert.ok(colaboradores.includes("from app.models.collaborator import Collaborator"));
 });
+
+
+test("página sem frases redundantes e catálogo sem opções locais", () => {
+  for (const frase of ["✦ Toda história merece crédito. · Protótipo acadêmico","Uma experiência mais fácil para você01 / 03","POR QUE ESCOLHER NOSSO FLUXO","Do primeiro clique ao acompanhamento, uma jornada pensada para você saber exatamente o que fazer.","COMO FUNCIONA","Uma jornada direta, sem complicação e com todas as informações em um só lugar.","VAMOS COMEÇAR?","Escolha sua opção, informe seus dados e acompanhe o andamento da solicitação.","✦Um passo de cada vez.Simples assim.","A aprovação está sujeita à análise. Este formulário faz parte de um projeto acadêmico.","ACOMPANHE DE PERTO","Já fez sua solicitação? Informe seu CPF e o código privado recebido ao solicitar.","↗É rápido, fácil e você não precisa preencher tudo de novo.","DÚVIDAS FREQUENTES","Toda história merece crédito.","Encontre respostas rápidas para seguir com mais tranquilidade.","Uma experiência mais fácil para você","01 / 03","Toda história merece crédito.","Protótipo acadêmico Uma experiência"]) {
+    assert.ok(!html.includes(frase), frase);
+  }
+  assert.ok(!passo1.includes("cartoesFallback"));
+  assert.ok(passo1.includes('apiRequest("/cartoes/")'));
+  assert.ok(passo1.includes("Tentar novamente"));
+  assert.ok(html.includes('src="js/api-config.js"'));
+});
