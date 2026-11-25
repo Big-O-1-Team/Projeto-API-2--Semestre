@@ -2,7 +2,7 @@
 
 1. Escolha Cartão DM, Loja Física ou Loja Digital.
 2. Informe nome, CPF, telefone, e-mail e CEP. Para cartão de loja, pesquise por rede, nome ou cidade e selecione a unidade ou parceiro digital. O cartão digital não tem via física.
-3. Na busca física, use a localização opcional para ordenar por distância aproximada em linha reta. O CEP continua limitando o estado. Se negar a permissão, use a busca normal. Unidades sem coordenadas não exibem distância.
+3. Na busca física, use a localização opcional para visualizar sua posição e as lojas no mapa, ordenadas por distância aproximada em linha reta. Clique no marcador e selecione o programa de cartão, ou use a lista. O mapa de ruas depende da conexão com OpenStreetMap. O CEP continua limitando o estado. Se negar a permissão, use a busca normal. Unidades sem coordenadas não exibem distância.
 4. Se houver atendente, selecione-o opcionalmente.
 5. Envie a solicitação. Guarde o código privado e o protocolo; consulte com CPF e código. Se perder o código, solicite recuperação administrativa após confirmação de identidade. Não confunda pré-qualificação com emissão.
 6. Se já houver pedido aprovado ou em análise para o mesmo programa, acompanhe o pedido anterior em vez de criar outro.

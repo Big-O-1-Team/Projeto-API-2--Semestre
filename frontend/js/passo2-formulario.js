@@ -4,8 +4,9 @@ const PassoDois = {
     if (!passo) return;
 
     const precisaLoja = AppState.tipoCartao !== "DM";
+    MapaLojas.limpar();
     this.localizacao = null;
-    this.buscaAtual = 0;
+    this.buscaAtual = (this.buscaAtual || 0) + 1;
 
     AppState.loja = null;
     AppState.contribuidorId = null;
@@ -46,7 +47,7 @@ const PassoDois = {
               <label for="filtro-parceiros">Loja, rede ou cidade</label>
               <input id="filtro-parceiros" type="search" placeholder="Buscar por nome">
               <button type="button" class="btn-secundario" id="filtrar-parceiros">Pesquisar</button>
-              ${AppState.tipoCartao === "LOJA_FISICA" ? '<button type="button" class="btn-secundario" id="usar-localizacao">Usar minha localização</button><small>A localização é opcional e usada apenas para ordenar as lojas elegíveis pelo CEP.</small>' : ""}
+              ${AppState.tipoCartao === "LOJA_FISICA" ? '<button type="button" class="btn-secundario" id="usar-localizacao">Usar minha localização</button><small>Localização opcional. O mapa usa OpenStreetMap; as lojas continuam limitadas ao estado do CEP.</small>' : ""}
             </div>
             <div class="lojas-box" id="lojas-box">
               <p>Escolha uma unidade ou parceiro digital.</p>
@@ -66,7 +67,12 @@ const PassoDois = {
 
     this.configurarMascaras();
 
-    document.getElementById("voltar-passo-1").addEventListener("click", () => irParaPasso(1));
+    document.getElementById("voltar-passo-1").addEventListener("click", () => {
+      this.buscaAtual++;
+      this.localizacao = null;
+      MapaLojas.limpar();
+      irParaPasso(1);
+    });
 
     if (precisaLoja) {
       document.getElementById("buscar-lojas").addEventListener("click", () => this.buscarLojas());
@@ -99,6 +105,7 @@ const PassoDois = {
       cep.value = valor.replace(/(\d{5})(\d{1,3})/, "$1-$2");
 
       this.buscaAtual++;
+      MapaLojas.limpar();
       this.localizacao = null;
       AppState.loja = null;
       AppState.contribuidorId = null;
@@ -130,12 +137,14 @@ const PassoDois = {
     botao.disabled = true;
     navigator.geolocation.getCurrentPosition(posicao => {
       botao.disabled = false;
-      if (!botao.isConnected || document.getElementById("cep").value !== cep) return;
+      if (!botao.isConnected || document.getElementById("passo-2").hidden || document.getElementById("cep").value !== cep) return;
       this.localizacao = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
       this.buscarLojas();
     }, () => {
       botao.disabled = false;
+      if (!botao.isConnected || document.getElementById("passo-2").hidden) return;
       this.localizacao = null;
+      MapaLojas.limpar();
       mostrarMensagem("Não foi possível acessar sua localização. Use o CEP.");
     }, { timeout: 10000, maximumAge: 0 });
   },
@@ -153,6 +162,7 @@ const PassoDois = {
     AppState.loja = null;
     AppState.contribuidorId = null;
     AppState.contribuidoresCarregados = false;
+    MapaLojas.limpar();
     box.textContent = "Buscando lojas...";
     try {
       const params = { cep, modalidade, pagina, limite: 50, busca: document.getElementById("filtro-parceiros").value };
@@ -171,7 +181,10 @@ const PassoDois = {
       const resumo = document.createElement("p");
       resumo.textContent = resposta.total + " opção(ões) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");
       box.append(resumo);
-      if (!resposta.lojas.length) return;
+      if (!resposta.lojas.length) {
+        if (this.localizacao && modalidade === "LOJA_FISICA") MapaLojas.exibir(box, this.localizacao, [], null);
+        return;
+      }
       const seletor = document.createElement("select");
       seletor.id = "loja-id";
       seletor.required = true;
@@ -196,6 +209,9 @@ const PassoDois = {
       }
       if (this.localizacao) seletor.querySelectorAll("optgroup").forEach(g => { if (!g.children.length) g.remove(); });
       box.append(seletor);
+      if (modalidade === "LOJA_FISICA" && (this.localizacao || resposta.lojas.some(l => l.latitude != null && l.longitude != null))) {
+        MapaLojas.exibir(box, this.localizacao, resposta.lojas, seletor);
+      }
       const navegacao = document.createElement("div");
       navegacao.className = "acoes-passo";
       for (const [texto, destino, desabilitado] of [["Anterior", pagina - 1, pagina === 1], ["Próxima", pagina + 1, pagina * resposta.limite >= resposta.total]]) {
@@ -218,6 +234,7 @@ const PassoDois = {
         AppState.contribuidoresCarregados = false;
         document.getElementById("contribuidores-box")?.remove();
         detalhe.textContent = loja?.programa_nome ? "Cartão: " + loja.programa_nome + ". Uma solicitação por programa compartilhado." : "";
+        MapaLojas.destacar(seletor.value);
         if (loja) await this.buscarContribuidores(loja.id);
       });
     } catch (erro) {
@@ -238,7 +255,7 @@ const PassoDois = {
     try {
       const contribuidores = await apiRequest(`/lojas/parceiras/${lojaId}/contribuidores`);
 
-      if (AppState.loja?.id !== lojaId) return;
+      if (!container.isConnected || AppState.loja?.id !== lojaId) return;
 
       AppState.contribuidoresCarregados = true;
       AppState.contribuidoresDisponiveis = contribuidores.length > 0;
@@ -262,7 +279,7 @@ const PassoDois = {
         AppState.contribuidorId = evento.target.value ? Number(evento.target.value) : null;
       });
     } catch (erro) {
-      if (AppState.loja?.id !== lojaId) return;
+      if (!container.isConnected || AppState.loja?.id !== lojaId) return;
 
       AppState.contribuidoresCarregados = true;
       AppState.contribuidorId = null;
@@ -316,6 +333,8 @@ const PassoDois = {
 
       AppState.dados = payload;
       AppState.solicitacao = resposta;
+      MapaLojas.limpar();
+      this.localizacao = null;
       PassoTres.exibirResultado();
       irParaPasso(3);
     } catch (erro) {

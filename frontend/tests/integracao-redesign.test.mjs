@@ -70,3 +70,14 @@ test("página sem frases redundantes e catálogo sem opções locais", () => {
   assert.ok(passo1.includes("Tentar novamente"));
   assert.ok(html.includes('src="js/api-config.js"'));
 });
+
+
+test("mapa interativo está ligado ao formulário", () => {
+  const mapa = ler("../js/mapa-lojas.js");
+  assert.ok(html.includes('src="vendor/leaflet/leaflet.js"'));
+  assert.ok(html.includes('src="js/mapa-lojas.js"'));
+  assert.ok(passo2.includes("MapaLojas.exibir"));
+  assert.ok(mapa.includes("L.marker"));
+  assert.ok(mapa.includes('new Event("change"'));
+  assert.ok(mapa.includes("OpenStreetMap"));
+});

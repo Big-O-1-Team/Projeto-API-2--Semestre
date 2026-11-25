@@ -13,6 +13,8 @@ const contexto = await browser.newContext({
   recordVideo: { dir: "demonstracao", size: { width: 1280, height: 850 } }
 });
 const pagina = await contexto.newPage();
+// Evita depender da disponibilidade de tiles externos no CI.
+await contexto.route("https://tile.openstreetmap.org/**", route => route.abort());
 const erros = [];
 pagina.on("pageerror", erro => erros.push(erro.message));
 pagina.on("response", async resposta => {
@@ -44,12 +46,17 @@ try {
   await pagina.locator("#loja-id option").nth(1).waitFor({ state: "attached" });
   const opcoes = await pagina.locator("#loja-id option").allTextContents();
   assert.match(opcoes[1], /Aquarius/);
+  await pagina.locator("#mapa-lojas .mapa-pin--usuario").waitFor();
   await pagina.screenshot({ path: "demonstracao/02-localizacao.png" });
   const lojas = await (await fetch(api + "/lojas/parceiras?cep=12210000")).json();
   const unidade = lojas.lojas.find(l => l.nome.includes("Aquarius"));
   const outra = lojas.lojas.find(l => l.id !== unidade.id && l.programa_id === unidade.programa_id);
   assert.ok(outra);
-  await pagina.locator("#loja-id").selectOption(String(unidade.id) + ':' + unidade.programa_id);
+  await pagina.locator("#mapa-lojas .mapa-pin--usuario").waitFor();
+  assert.ok(await pagina.locator("#mapa-lojas .mapa-pin--loja").count() >= 2);
+  await pagina.locator('#mapa-lojas .mapa-pin--loja[title="' + unidade.nome + '"]').click();
+  await pagina.locator("#mapa-lojas .mapa-selecionar").click();
+  assert.equal(await pagina.locator("#loja-id").inputValue(), String(unidade.id) + ':' + unidade.programa_id);
   await pagina.locator("#contribuidores-box").getByText("sem atribuição", { exact: false }).waitFor();
   await pagina.locator("#enviar-solicitacao").click();
   await pagina.locator('#passo-3 [data-status="EM_ANALISE"]').waitFor();

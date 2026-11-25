@@ -203,3 +203,13 @@
 
 .formulario__cabecalho h2 { margin-top: 0; }
 .consulta-status__texto h2 { margin-top: 0; }
+
+#mapa-lojas-bloco { margin-top: 14px; }
+#mapa-lojas { height: 320px; width: 100%; border: 1px solid #dfe4f1; border-radius: 10px; z-index: 0; }
+#mapa-lojas .leaflet-popup-content { overflow-wrap: anywhere; }
+.mapa-pin { border: 2px solid white; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 2px 6px #0005; color: white; font-size: 16px; }
+.mapa-pin--usuario { background: #176bd4; }
+.mapa-pin--loja { background: #2536aa; }
+.mapa-selecionar { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 0; border-radius: 6px; background: #2536aa; color: white; cursor: pointer; font-size: 12px; }
+.mapa-aviso { min-height: 0; }
+@media (max-width: 480px) { #mapa-lojas { height: 260px; } }
