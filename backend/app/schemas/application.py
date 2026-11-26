@@ -12,6 +12,9 @@ class ApplicationCreate(BaseModel):
     cep: str = Field(min_length=8, max_length=8)
     tipo_cartao: Literal["DM", "LOJA_FISICA", "LOJA_DIGITAL"]
     loja_id: int | None = Field(default=None, gt=0)
+    contribuidor_id: int | None = Field(default=None, gt=0)
+    programa_id: int | None = Field(default=None, gt=0)
+    aceita_ofertas: bool = False
 
     model_config = ConfigDict(extra="forbid")
 
@@ -33,12 +36,20 @@ class ApplicationResponse(BaseModel):
     loja_id: int | None
     status: str
     criado_em: datetime
+    contribuidor_id: int | None
+    programa_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class ApplicationCreated(ApplicationResponse):
+    codigo_consulta: str
+    situacao_oferta: str | None = None
+
+
 class ConsultaCpf(BaseModel):
     cpf: str = Field(min_length=11, max_length=14)
+    codigo: str = Field(min_length=20, max_length=120)
 
     model_config = ConfigDict(extra="forbid")
 

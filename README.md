@@ -136,4 +136,6 @@ Detalhes técnicos e lista completa de alterações: [SPRINT1_ALTERACOES.md](SPR
 
 Manual de instalação: [docs/MANUAL_INSTALACAO.md](docs/MANUAL_INSTALACAO.md).
 
-Manual do usuário da Sprint 1: [docs/MANUAL_USUARIO_SPRINT1.md](docs/MANUAL_USUARIO_SPRINT1.md).
+Manual do usuário: [docs/MANUAL_USUARIO_SPRINT1.md](docs/MANUAL_USUARIO_SPRINT1.md).
+
+[Modelo relacional](docs/MODELO_DADOS.md) · [API](docs/API.md) · [Wireframe](docs/img/wireframe.svg)

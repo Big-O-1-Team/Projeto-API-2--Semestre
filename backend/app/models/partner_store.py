@@ -1,5 +1,7 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models.card_program import CardProgram, programa_unidades
 
 
 class PartnerStore(Base):
@@ -13,6 +15,34 @@ class PartnerStore(Base):
     cep = Column(String(8), nullable=False)
     ativo = Column(Boolean, nullable=False, default=True)
     emite_cartao_credito = Column(Boolean, nullable=False, default=False, server_default="0")
+
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    programas = relationship(CardProgram, secondary=programa_unidades, order_by=CardProgram.id)
+
+    @property
+    def programa(self):
+        return self.programas[0] if len(self.programas) == 1 else None
+
+    @property
+    def programa_id(self):
+        return self.programa.id if self.programa else None
+
+    @property
+    def programas_ids(self):
+        return [programa.id for programa in self.programas]
+
+    @property
+    def rede_nome(self):
+        return self.programa.rede.nome if self.programa else None
+
+    @property
+    def programa_nome(self):
+        return self.programa.nome if self.programa else None
+
+    @property
+    def modalidade(self):
+        return self.programa.modalidade if self.programa else "LOJA_FISICA"
 
     @property
     def role(self) -> str:

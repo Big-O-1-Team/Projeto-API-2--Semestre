@@ -1,5 +1,6 @@
 from app.database import SessionLocal
 from app.models.card import Card
+from app.models.card_program import PartnerNetwork, CardProgram
 from app.models.collaborator import Collaborator
 from app.models.partner_store import PartnerStore
 
@@ -68,6 +69,30 @@ def seed_database():
                         ativo=True,
                     )
                 )
+
+        rede = db.query(PartnerNetwork).filter_by(nome="Rede Demonstração").first()
+        if rede is None:
+            rede = PartnerNetwork(nome="Rede Demonstração")
+            db.add(rede)
+            db.flush()
+        programa = db.query(CardProgram).filter_by(rede_id=rede.id, nome="Cartão Rede Demonstração", modalidade="LOJA_FISICA").first()
+        if programa is None:
+            programa = CardProgram(rede_id=rede.id, nome="Cartão Rede Demonstração", modalidade="LOJA_FISICA")
+            db.add(programa)
+            db.flush()
+            for loja in db.query(PartnerStore).filter(PartnerStore.nome.in_(["Loja Parceira Centro SJC", "Loja Parceira Jardim Aquarius"])).all():
+                if not loja.programas:
+                    loja.programas.append(programa)
+            for nome, lat, lon in [("Loja Parceira Centro SJC", -23.186, -45.884), ("Loja Parceira Jardim Aquarius", -23.222, -45.913)]:
+                db.query(PartnerStore).filter_by(nome=nome, latitude=None, longitude=None).update({"latitude": lat, "longitude": lon}, synchronize_session=False)
+        digital = db.query(CardProgram).filter_by(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL").first()
+        if digital is None:
+            digital = CardProgram(rede_id=rede.id, nome="Cartão Digital Demonstração", modalidade="LOJA_DIGITAL")
+            db.add(digital)
+            db.flush()
+            loja_digital = PartnerStore(nome="Parceiro Digital Demonstração", estado="SP", cidade="São José dos Campos", endereco="Canal digital", cep="12210000", ativo=True)
+            loja_digital.programas.append(digital)
+            db.add(loja_digital)
 
         for dados in COLABORADORES_FICTICIOS:
             existe = db.query(Collaborator).filter(Collaborator.cpf == dados["cpf"]).first()

@@ -65,7 +65,10 @@ def test_quatro_colaboradores_aprovados_no_dm(ambiente):
 
 def test_colaborador_recusado_em_loja(ambiente):
     cliente, sessao = ambiente
-    digital = solicitar(cliente, "32376226643", "LOJA_DIGITAL")
+    with sessao() as db:
+        loja_digital = next(loja for loja in db.query(PartnerStore).all() if loja.modalidade == "LOJA_DIGITAL")
+        digital_id = loja_digital.id
+    digital = solicitar(cliente, "32376226643", "LOJA_DIGITAL", digital_id)
     assert digital.status_code == 201, digital.text
     assert digital.json()["status"] == "REPROVADO"
 
@@ -103,10 +106,10 @@ def test_colaborador_inativo_nao_recebe_aprovacao(ambiente):
 
 def test_solicitacao_repetida_nao_duplicar_usuario(ambiente):
     cliente, sessao = ambiente
-    for _ in range(2):
-        resposta = solicitar(cliente, "21953320694")
-        assert resposta.status_code == 201, resposta.text
-        assert resposta.json()["status"] == "APROVADO"
+    resposta = solicitar(cliente, "21953320694")
+    assert resposta.status_code == 201, resposta.text
+    assert resposta.json()["status"] == "APROVADO"
+    assert solicitar(cliente, "21953320694").status_code == 409
     with sessao() as db:
         assert db.query(User).filter(User.cpf == "21953320694").count() == 1
-        assert db.query(Application).count() == 2
+        assert db.query(Application).count() == 1

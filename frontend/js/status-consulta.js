@@ -55,6 +55,8 @@ function iniciarConsultaStatus() {
     if (carregando) return;
 
     const cpf = apenasNumeros(campoCpf.value);
+    const codigo = document.getElementById("codigo-consulta").value.trim();
+    if (codigo.length < 20) { mensagem("Informe o código privado da solicitação."); return; }
     if (cpf.length !== 11) {
       mensagem("Informe um CPF com 11 números.");
       return;
@@ -76,10 +78,10 @@ function iniciarConsultaStatus() {
       const resposta = await apiRequest(`/solicitacoes/consultar?pagina=${pagina}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cpf })
+        body: JSON.stringify({ cpf, codigo })
       });
 
-      if (cpf !== apenasNumeros(campoCpf.value)) return;
+      if (cpf !== apenasNumeros(campoCpf.value) || codigo !== document.getElementById("codigo-consulta").value.trim()) return;
 
       const solicitacoes = Array.isArray(resposta.solicitacoes) ? resposta.solicitacoes : [];
       const total = Number(resposta.total) || 0;
@@ -88,7 +90,7 @@ function iniciarConsultaStatus() {
       if (pagina === 1) {
         resultado.replaceChildren();
         if (!total) {
-          mensagem("Nenhuma solicitação encontrada para este CPF.");
+          mensagem("Nenhuma solicitação encontrada para os dados informados.");
           return;
         }
 
@@ -126,6 +128,11 @@ function iniciarConsultaStatus() {
       botao.textContent = "Buscar solicitações";
     }
   }
+
+  document.getElementById("codigo-consulta").addEventListener("input", () => {
+    resultado.hidden = true;
+    resultado.replaceChildren();
+  });
 
   campoCpf.addEventListener("input", () => {
     const numeros = apenasNumeros(campoCpf.value).slice(0, 11);

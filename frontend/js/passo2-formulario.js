@@ -3,11 +3,19 @@ const PassoDois = {
     const passo = document.getElementById("passo-2");
     if (!passo) return;
 
-    const precisaLoja = AppState.tipoCartao === "LOJA_FISICA";
+    const precisaLoja = AppState.tipoCartao !== "DM";
+    MapaLojas.limpar();
+    this.localizacao = null;
+    this.buscaAtual = (this.buscaAtual || 0) + 1;
+
+    AppState.loja = null;
+    AppState.contribuidorId = null;
+    AppState.contribuidoresCarregados = false;
+    AppState.contribuidoresDisponiveis = false;
 
     passo.innerHTML = `
       <h3 class="passo__titulo">Agora, conte um pouco sobre você</h3>
-      <p class="passo__descricao">Cartão selecionado: <strong>${AppState.nomeCartao || AppState.tipoCartao}</strong></p>
+      <p class="passo__descricao">Cartão selecionado: <strong>${escaparHtml(AppState.nomeCartao || AppState.tipoCartao)}</strong></p>
       ${AppState.tipoCartao === "LOJA_DIGITAL" ? '<p class="aviso-digital">O Cartão Loja Digital não possui emissão de via física e pode ser solicitado de qualquer estado.</p>' : ""}
       <form id="form-dados" novalidate>
         <div class="form-grid">
@@ -35,12 +43,21 @@ const PassoDois = {
             </div>
           </div>
           ${precisaLoja ? `
+            <div class="campo campo--completo">
+              <label for="filtro-parceiros">Loja, rede ou cidade</label>
+              <input id="filtro-parceiros" type="search" placeholder="Buscar por nome">
+              <button type="button" class="btn-secundario" id="filtrar-parceiros">Pesquisar</button>
+              ${AppState.tipoCartao === "LOJA_FISICA" ? '<button type="button" class="btn-secundario" id="usar-localizacao">Usar minha localização</button><small>Localização opcional. O mapa usa OpenStreetMap; as lojas continuam limitadas ao estado do CEP.</small>' : ""}
+            </div>
             <div class="lojas-box" id="lojas-box">
-              <strong>Lojas parceiras</strong>
-              <p>Informe seu CEP e clique em “Buscar lojas”.</p>
+              <p>Escolha uma unidade ou parceiro digital.</p>
             </div>
           ` : ""}
         </div>
+        <label class="ofertas__check">
+          <input type="checkbox" id="autorizar-ofertas" name="aceita_ofertas">
+          <span>Se meu pedido for reprovado, aceito receber outras ofertas por e-mail (opcional).</span>
+        </label>
         <div class="acoes-passo">
           <button type="button" class="btn-secundario" id="voltar-passo-1">Voltar</button>
           <button type="submit" class="btn-primario" id="enviar-solicitacao">Enviar solicitação</button>
@@ -50,10 +67,17 @@ const PassoDois = {
 
     this.configurarMascaras();
 
-    document.getElementById("voltar-passo-1").addEventListener("click", () => irParaPasso(1));
+    document.getElementById("voltar-passo-1").addEventListener("click", () => {
+      this.buscaAtual++;
+      this.localizacao = null;
+      MapaLojas.limpar();
+      irParaPasso(1);
+    });
 
     if (precisaLoja) {
       document.getElementById("buscar-lojas").addEventListener("click", () => this.buscarLojas());
+      document.getElementById("filtrar-parceiros").addEventListener("click", () => this.buscarLojas());
+      document.getElementById("usar-localizacao")?.addEventListener("click", () => this.usarLocalizacao());
     }
 
     document.getElementById("form-dados").addEventListener("submit", (evento) => this.enviar(evento));
@@ -79,47 +103,187 @@ const PassoDois = {
     cep.addEventListener("input", () => {
       const valor = apenasNumeros(cep.value).slice(0, 8);
       cep.value = valor.replace(/(\d{5})(\d{1,3})/, "$1-$2");
+
+      this.buscaAtual++;
+      MapaLojas.limpar();
+      this.localizacao = null;
       AppState.loja = null;
+      AppState.contribuidorId = null;
+      AppState.contribuidoresCarregados = false;
+      AppState.contribuidoresDisponiveis = false;
+
+      const box = document.getElementById("lojas-box");
+
+      if (box) {
+        box.innerHTML = `
+          <strong>Lojas parceiras</strong>
+          <p>CEP alterado. Busque as lojas novamente.</p>
+        `;
+      }
     });
   },
 
-  async buscarLojas() {
-    const cep = apenasNumeros(document.getElementById("cep").value);
-    const box = document.getElementById("lojas-box");
-
-    if (cep.length !== 8) {
-      mostrarMensagem("Informe um CEP com 8 números antes de buscar as lojas.");
+  usarLocalizacao() {
+    if (!navigator.geolocation) {
+      mostrarMensagem("Localização indisponível. Busque pelo CEP.");
       return;
     }
+    if (apenasNumeros(document.getElementById("cep").value).length !== 8) {
+      mostrarMensagem("Informe primeiro o CEP.");
+      return;
+    }
+    const cep = document.getElementById("cep").value;
+    const botao = document.getElementById("usar-localizacao");
+    botao.disabled = true;
+    navigator.geolocation.getCurrentPosition(posicao => {
+      botao.disabled = false;
+      if (!botao.isConnected || document.getElementById("passo-2").hidden || document.getElementById("cep").value !== cep) return;
+      this.localizacao = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+      this.buscarLojas();
+    }, () => {
+      botao.disabled = false;
+      if (!botao.isConnected || document.getElementById("passo-2").hidden) return;
+      this.localizacao = null;
+      MapaLojas.limpar();
+      mostrarMensagem("Não foi possível acessar sua localização. Use o CEP.");
+    }, { timeout: 10000, maximumAge: 0 });
+  },
 
+  async buscarLojas(pagina = 1) {
+    const cep = apenasNumeros(document.getElementById("cep").value);
+    const box = document.getElementById("lojas-box");
+    const modalidade = AppState.tipoCartao;
+    if (cep.length !== 8) {
+      mostrarMensagem("Informe um CEP com 8 números.");
+      return;
+    }
+    const pedido = ++this.buscaAtual;
     esconderMensagem();
-    box.innerHTML = "<strong>Lojas parceiras</strong><p>Buscando lojas...</p>";
+    AppState.loja = null;
+    AppState.contribuidorId = null;
+    AppState.contribuidoresCarregados = false;
+    MapaLojas.limpar();
+    box.textContent = "Buscando lojas...";
+    try {
+      const params = { cep, modalidade, pagina, limite: 50, busca: document.getElementById("filtro-parceiros").value };
+      let resposta;
+      if (this.localizacao && modalidade === "LOJA_FISICA") {
+        resposta = await apiRequest("/lojas/buscar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...params, ...this.localizacao })
+        });
+      } else {
+        resposta = await apiRequest("/lojas/parceiras?" + new URLSearchParams(params));
+      }
+      if (pedido !== this.buscaAtual || !box.isConnected || document.getElementById("passo-2").hidden || apenasNumeros(document.getElementById("cep").value) !== cep || modalidade !== AppState.tipoCartao) return;
+      box.replaceChildren();
+      const resumo = document.createElement("p");
+      resumo.textContent = resposta.total + " opção(ões) disponível(is)." + (this.localizacao ? " Distância aproximada em linha reta." : "");
+      box.append(resumo);
+      if (!resposta.lojas.length) {
+        if (this.localizacao && modalidade === "LOJA_FISICA") MapaLojas.exibir(box, this.localizacao, [], null);
+        return;
+      }
+      const seletor = document.createElement("select");
+      seletor.id = "loja-id";
+      seletor.required = true;
+      seletor.setAttribute("aria-label", "Escolha a unidade");
+      seletor.append(new Option("Selecione uma unidade", ""));
+      const grupos = new Map();
+      for (const loja of resposta.lojas) {
+        const nome = loja.rede_nome ? loja.rede_nome + " — " + loja.programa_nome : "Lojas independentes";
+        if (!grupos.has(nome)) {
+          const grupo = document.createElement("optgroup");
+          grupo.label = nome;
+          seletor.append(grupo);
+          grupos.set(nome, grupo);
+        }
+        const distancia = loja.distancia_km == null ? "" : " — " + loja.distancia_km.toLocaleString("pt-BR") + " km";
+        const local = modalidade === "LOJA_DIGITAL" ? "" : " — " + loja.cidade + ", " + loja.endereco;
+        const opcao = new Option(loja.nome + local + distancia, String(loja.id) + ":" + (loja.programa_id || ""));
+        if (this.localizacao) {
+          opcao.textContent = (loja.rede_nome ? loja.rede_nome + " — " + loja.programa_nome + " — " : "") + opcao.textContent;
+          seletor.append(opcao);
+        } else grupos.get(nome).append(opcao);
+      }
+      if (this.localizacao) seletor.querySelectorAll("optgroup").forEach(g => { if (!g.children.length) g.remove(); });
+      box.append(seletor);
+      if (modalidade === "LOJA_FISICA" && (this.localizacao || resposta.lojas.some(l => l.latitude != null && l.longitude != null))) {
+        MapaLojas.exibir(box, this.localizacao, resposta.lojas, seletor);
+      }
+      const navegacao = document.createElement("div");
+      navegacao.className = "acoes-passo";
+      for (const [texto, destino, desabilitado] of [["Anterior", pagina - 1, pagina === 1], ["Próxima", pagina + 1, pagina * resposta.limite >= resposta.total]]) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn-secundario";
+        b.textContent = texto;
+        b.disabled = desabilitado;
+        b.addEventListener("click", () => this.buscarLojas(destino));
+        navegacao.append(b);
+      }
+      box.append(navegacao);
+      const detalhe = document.createElement("p");
+      detalhe.setAttribute("aria-live", "polite");
+      box.append(detalhe);
+      seletor.addEventListener("change", async () => {
+        const loja = resposta.lojas.find(item => String(item.id) + ":" + (item.programa_id || "") === seletor.value);
+        AppState.loja = loja || null;
+        AppState.contribuidorId = null;
+        AppState.contribuidoresCarregados = false;
+        document.getElementById("contribuidores-box")?.remove();
+        detalhe.textContent = loja?.programa_nome ? "Cartão: " + loja.programa_nome + ". Uma solicitação por programa compartilhado." : "";
+        MapaLojas.destacar(seletor.value);
+        if (loja) await this.buscarContribuidores(loja.id);
+      });
+    } catch (erro) {
+      if (pedido !== this.buscaAtual || !box.isConnected) return;
+      box.textContent = "Não foi possível consultar as lojas.";
+      mostrarMensagem(erro.message);
+    }
+  },
+
+  async buscarContribuidores(lojaId) {
+    const box = document.getElementById("lojas-box");
+    const container = document.createElement("div");
+
+    container.id = "contribuidores-box";
+    container.textContent = "Buscando contribuidores...";
+    box.appendChild(container);
 
     try {
-      const resposta = await apiRequest(`/lojas/parceiras?cep=${cep}`);
+      const contribuidores = await apiRequest(`/lojas/parceiras/${lojaId}/contribuidores`);
 
-      if (!resposta.lojas.length) {
-        box.innerHTML = `<strong>Lojas parceiras em ${resposta.uf}</strong><p>Nenhuma loja cadastrada para este estado no ambiente de demonstração.</p>`;
-        AppState.loja = null;
+      if (!container.isConnected || AppState.loja?.id !== lojaId) return;
+
+      AppState.contribuidoresCarregados = true;
+      AppState.contribuidoresDisponiveis = contribuidores.length > 0;
+
+      if (!contribuidores.length) {
+        container.textContent = "Esta loja ainda não possui contribuidores cadastrados. A solicitação poderá continuar sem atribuição.";
         return;
       }
 
-      box.innerHTML = `
-        <strong>Lojas parceiras em ${resposta.uf}</strong>
-        <p>${resposta.total} opção(ões) encontrada(s). Escolha uma para continuar.</p>
-        <select id="loja-id" aria-label="Escolha uma loja parceira">
-          <option value="">Selecione uma loja</option>
-          ${resposta.lojas.map((loja) => `<option value="${loja.id}">${loja.nome} — ${loja.cidade}${loja.emite_cartao_credito ? " (emite cartão)" : ""}</option>`).join("")}
-        </select>
+      container.innerHTML = `
+        <div class="campo">
+          <label for="contribuidor-id">Atendente responsável (opcional)</label>
+          <select id="contribuidor-id">
+            <option value="">Não sei informar</option>
+            ${contribuidores.map(contribuidor => `<option value="${contribuidor.id}">${escaparHtml(contribuidor.nome)}</option>`).join("")}
+          </select>
+        </div>
       `;
 
-      document.getElementById("loja-id").addEventListener("change", (evento) => {
-        const loja = resposta.lojas.find((item) => String(item.id) === evento.target.value);
-        AppState.loja = loja || null;
+      document.getElementById("contribuidor-id").addEventListener("change", (evento) => {
+        AppState.contribuidorId = evento.target.value ? Number(evento.target.value) : null;
       });
     } catch (erro) {
-      box.innerHTML = "<strong>Lojas parceiras</strong><p>Não foi possível consultar as lojas.</p>";
-      mostrarMensagem(erro.message);
+      if (!container.isConnected || AppState.loja?.id !== lojaId) return;
+
+      AppState.contribuidoresCarregados = true;
+      AppState.contribuidorId = null;
+      container.textContent = "Atendente indisponível. Você pode continuar sem atribuição.";
     }
   },
 
@@ -128,23 +292,32 @@ const PassoDois = {
     esconderMensagem();
 
     const form = evento.currentTarget;
+
     if (!form.reportValidity()) return;
+
+    if (AppState.tipoCartao !== "DM" && !AppState.loja) {
+      mostrarMensagem("Busque o CEP e escolha uma loja parceira antes de enviar.");
+      return;
+    }
+
+    if (AppState.tipoCartao !== "DM" && !AppState.contribuidoresCarregados) {
+      mostrarMensagem("Não foi possível carregar os contribuidores. Selecione a loja novamente.");
+      return;
+    }
 
     const dadosForm = new FormData(form);
     const payload = {
       nome: String(dadosForm.get("nome") || "").trim(),
       cpf: apenasNumeros(dadosForm.get("cpf")),
       email: String(dadosForm.get("email") || "").trim(),
+      aceita_ofertas: dadosForm.has("aceita_ofertas"),
       telefone: apenasNumeros(dadosForm.get("telefone")),
       cep: apenasNumeros(dadosForm.get("cep")),
       tipo_cartao: AppState.tipoCartao,
-      loja_id: AppState.loja ? AppState.loja.id : null
+      loja_id: AppState.loja ? AppState.loja.id : null,
+      programa_id: AppState.loja?.programa_id || null,
+      contribuidor_id: AppState.contribuidorId
     };
-
-    if (AppState.tipoCartao === "LOJA_FISICA" && !AppState.loja) {
-      mostrarMensagem("Busque o CEP e escolha uma loja parceira antes de enviar.");
-      return;
-    }
 
     const botao = document.getElementById("enviar-solicitacao");
     botao.disabled = true;
@@ -160,6 +333,8 @@ const PassoDois = {
 
       AppState.dados = payload;
       AppState.solicitacao = resposta;
+      MapaLojas.limpar();
+      this.localizacao = null;
       PassoTres.exibirResultado();
       irParaPasso(3);
     } catch (erro) {

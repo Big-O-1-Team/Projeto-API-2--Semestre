@@ -1,9 +1,12 @@
-const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
+const API_URL = window.DM_API_URL ?? `${window.location.protocol}//${window.location.hostname}:8000`;
 
 const AppState = {
   tipoCartao: null,
   nomeCartao: null,
   loja: null,
+  contribuidorId: null,
+  contribuidoresCarregados: false,
+  contribuidoresDisponiveis: false,
   dados: null,
   solicitacao: null
 };
@@ -21,6 +24,16 @@ async function apiRequest(caminho, opcoes = {}) {
 
 function apenasNumeros(valor) {
   return String(valor || "").replace(/\D/g, "");
+}
+
+function escaparHtml(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, caractere => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[caractere]);
 }
 
 function formatarStatus(status) {

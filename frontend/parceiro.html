@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2329c5">
+  <meta name="description" content="Área de parceiros da demonstração acadêmica DM.">
+  <title>Área do Parceiro | DM</title>
+  <link rel="stylesheet" href="css/parceiro.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="marca" href="index.html" aria-label="DM — voltar para a página inicial">
+      <span class="marca__logo">dm<span>.</span></span>
+      <span class="marca__divisor" aria-hidden="true"></span>
+      <span class="marca__nome">Portal do Parceiro</span>
+    </a>
+    <a class="voltar" href="index.html">Voltar ao início <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <div class="pagina">
+    <aside class="apresentacao" aria-labelledby="apresentacao-titulo">
+      <span class="etiqueta"><span aria-hidden="true">●</span> Área exclusiva para parceiros</span>
+      <h1 id="apresentacao-titulo">Sua equipe,<br><span>tudo em um só lugar.</span></h1>
+      <p>Cadastre e organize os atendentes responsáveis pelas solicitações de cartão da sua loja.</p>
+      <div class="vantagens">
+        <div><span aria-hidden="true">✓</span><p><strong>Organização por loja</strong> Cada parceiro gerencia apenas os próprios atendentes.</p></div>
+        <div><span aria-hidden="true">✓</span><p><strong>Gestão simplificada</strong> Cadastre, consulte e desative quando precisar.</p></div>
+        <div><span aria-hidden="true">✓</span><p><strong>Solicitações organizadas</strong> Identifique o atendimento associado aos pedidos.</p></div>
+      </div>
+      <div class="aviso-projeto">Ambiente demonstrativo desenvolvido para projeto acadêmico.</div>
+    </aside>
+
+    <main class="painel-principal">
+      <div class="painel-principal__topo">
+        <span class="painel-principal__icone" aria-hidden="true">DM</span>
+        <span>ACESSO A PARCEIROS</span>
+      </div>
+
+      <section id="login" aria-labelledby="login-titulo">
+        <h2 id="login-titulo">Entre na sua conta</h2>
+        <p class="descricao">Informe o e-mail e a senha do seu cadastro de parceiro.</p>
+        <form id="login-form">
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" required autocomplete="username" placeholder="seuemail@loja.com">
+          </div>
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <input id="senha" type="password" required autocomplete="current-password" placeholder="Sua senha">
+          </div>
+          <button type="submit" class="btn-primario">Entrar na conta <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <section id="painel" aria-labelledby="painel-titulo" hidden>
+        <div class="painel__cabecalho">
+          <div><span class="painel__etiqueta">SUA EQUIPE</span><h2 id="painel-titulo">Meus contribuidores</h2></div>
+          <button id="sair" class="secundario" type="button">Sair da conta</button>
+        </div>
+        <p id="dados-loja" class="dados-loja"></p>
+
+        <div class="bloco">
+          <h3>Cadastrar atendente</h3>
+          <p class="descricao">Adicione um nome para facilitar a atribuição das solicitações.</p>
+          <form id="contribuidor-form">
+            <div class="campo">
+              <label for="nome-contribuidor">Nome completo</label>
+              <input id="nome-contribuidor" type="text" minlength="3" maxlength="100" required autocomplete="off" placeholder="Nome do atendente">
+            </div>
+            <button type="submit" class="btn-primario">Cadastrar contribuidor <span aria-hidden="true">+</span></button>
+          </form>
+        </div>
+
+        <div class="bloco bloco--lista">
+          <div class="lista__cabecalho"><h3>Contribuidores cadastrados</h3><span class="lista__selo">Sua loja</span></div>
+          <div id="lista-contribuidores" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <div id="mensagem" class="mensagem" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <script src="js/api-config.js"></script>
+  <script src="js/parceiro.js"></script>
+</body>
+</html>

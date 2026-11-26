@@ -1,13 +1,26 @@
+
 import re
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+import hashlib
+import secrets
+import logging
+from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy import or_
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.application import Application
 from app.models.partner_store import PartnerStore
+from app.models.card_program import programa_unidades
+from app.models.partner_contributor import PartnerContributor
 from app.models.user import User
-from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationListResponse, ConsultaCpf
+from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationCreated, ApplicationListResponse, ConsultaCpf
 from app.services.cep_service import limpar_cep, obter_uf_por_cep
 from app.services.collaborator_service import modalidade_autorizada
+from app.services.qualificacao_service import cpf_valido, pre_qualificado
+from app.controllers.store_controller import validar_administrador
+from app.controllers.offer_controller import enviar_oferta
+from app.models.offer_interest import OfferInterest
+from sqlalchemy.exc import SQLAlchemyError
 from app.middleware.rate_limit import verificar_limite_consulta
 
 router = APIRouter(prefix="/solicitacoes", tags=["Solicitações"])
@@ -19,7 +32,7 @@ def somente_numeros(valor: str) -> str:
     return re.sub(r"\D", "", valor or "")
 
 
-@router.post("/", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=ApplicationCreated, status_code=status.HTTP_201_CREATED)
 def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_db)):
     nome = solicitacao.nome.strip()
     cpf = somente_numeros(solicitacao.cpf)
@@ -29,8 +42,8 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
 
     if len(nome) < 3:
         raise HTTPException(status_code=400, detail="Informe seu nome completo.")
-    if len(cpf) != 11:
-        raise HTTPException(status_code=400, detail="CPF deve conter 11 números.")
+    if not cpf_valido(cpf):
+        raise HTTPException(status_code=400, detail="CPF inválido.")
     if len(telefone) < 10 or len(telefone) > 11:
         raise HTTPException(status_code=400, detail="Telefone deve conter 10 ou 11 números.")
     if len(cep) != 8:
@@ -38,121 +51,150 @@ def criar_solicitacao(solicitacao: ApplicationCreate, db: Session = Depends(get_
     if tipo_cartao not in TIPOS_CARTAO:
         raise HTTPException(status_code=400, detail="Tipo de cartão inválido.")
 
+    try:
+        uf_cliente = obter_uf_por_cep(cep)
+    except ValueError as erro:
+        raise HTTPException(400, str(erro)) from erro
+
     loja = None
-    if tipo_cartao == "LOJA_FISICA":
+    contribuidor = None
+    programa = None
+
+    if tipo_cartao in ("LOJA_FISICA", "LOJA_DIGITAL"):
         if not solicitacao.loja_id:
             raise HTTPException(status_code=400, detail="Escolha uma loja parceira.")
 
         loja = db.query(PartnerStore).filter(
             PartnerStore.id == solicitacao.loja_id,
-            PartnerStore.ativo.is_(True),
+            PartnerStore.ativo.is_(True)
         ).first()
 
         if not loja:
             raise HTTPException(status_code=404, detail="Loja parceira não encontrada.")
 
-        try:
-            uf_cliente = obter_uf_por_cep(cep)
-        except ValueError as erro:
-            raise HTTPException(status_code=400, detail=str(erro)) from erro
+        programas = [p for p in loja.programas if p.ativo and p.rede.ativo and p.modalidade == tipo_cartao]
+        if solicitacao.programa_id is not None:
+            programa = next((p for p in programas if p.id == solicitacao.programa_id), None)
+            if programa is None:
+                raise HTTPException(400, "Programa inválido para esta unidade.")
+        elif len(programas) == 1:
+            programa = programas[0]
+        elif len(programas) > 1:
+            raise HTTPException(400, "Escolha o programa de cartão.")
+        elif loja.programas or tipo_cartao != "LOJA_FISICA":
+            raise HTTPException(400, "Esta unidade não oferece a modalidade solicitada.")
+        if tipo_cartao == "LOJA_FISICA" and loja.estado != uf_cliente:
+            raise HTTPException(400, "A loja escolhida não pertence ao estado do CEP informado.")
 
-        if loja.estado != uf_cliente:
-            raise HTTPException(
-                status_code=400,
-                detail="A loja escolhida não pertence ao estado do CEP informado.",
-            )
+        if solicitacao.contribuidor_id is not None:
+            contribuidor = db.query(PartnerContributor).filter(
+                PartnerContributor.id == solicitacao.contribuidor_id,
+                PartnerContributor.loja_id == loja.id,
+                PartnerContributor.ativo.is_(True)
+            ).first()
 
-    if tipo_cartao != "LOJA_FISICA" and solicitacao.loja_id is not None:
-        raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja física.")
+            if not contribuidor:
+                raise HTTPException(status_code=400, detail="Contribuidor inválido, inativo ou pertencente a outra loja.")
 
-    usuario_cpf = db.query(User).filter(User.cpf == cpf).first()
+    elif solicitacao.loja_id is not None or solicitacao.contribuidor_id is not None or solicitacao.programa_id is not None:
+        raise HTTPException(status_code=400, detail="Esse cartão não permite selecionar loja ou contribuidor.")
+
+    usuario_cpf = db.query(User).filter(User.cpf == cpf).with_for_update().first()
     usuario_email = db.query(User).filter(User.email == str(solicitacao.email)).first()
-
-    if usuario_cpf and usuario_email and usuario_cpf.id != usuario_email.id:
-        raise HTTPException(status_code=400, detail="CPF e e-mail pertencem a cadastros diferentes.")
-
-    usuario = usuario_cpf or usuario_email
+    if usuario_cpf or usuario_email:
+        if not usuario_cpf or not usuario_email or usuario_cpf.id != usuario_email.id:
+            raise HTTPException(409, "Não foi possível utilizar esses dados cadastrais.")
+    usuario = usuario_cpf
     modalidade_permitida = modalidade_autorizada(cpf, db)
     colaborador = modalidade_permitida is not None
-    if usuario:
-        usuario.nome = nome
-        usuario.email = str(solicitacao.email)
-        usuario.cpf = cpf
-        usuario.telefone = telefone
-        usuario.cep = cep
-        usuario.colaborador_dm = colaborador
-    else:
-        usuario = User(
-            nome=nome,
-            cpf=cpf,
-            email=str(solicitacao.email),
-            telefone=telefone,
-            cep=cep,
-            colaborador_dm=colaborador,
+
+    try:
+        if usuario is None:
+            usuario = User(nome=nome, cpf=cpf, email=str(solicitacao.email), telefone=telefone, cep=cep, colaborador_dm=colaborador)
+            db.add(usuario)
+            db.flush()
+
+        status_solicitacao = "EM_ANALISE"
+        if colaborador:
+            status_solicitacao = "APROVADO" if tipo_cartao == "DM" else "REPROVADO"
+        elif pre_qualificado(cpf, tipo_cartao):
+            status_solicitacao = "APROVADO"
+
+        programa_id = programa.id if programa else None
+        chave = None
+        if status_solicitacao != "REPROVADO":
+            grupo = f"programa:{programa_id}" if programa_id else (f"loja:{loja.id}" if loja else tipo_cartao)
+            chave = f"{usuario.id}:{tipo_cartao}:{grupo}"
+            anteriores = db.query(Application).filter(Application.usuario_id == usuario.id, Application.tipo_cartao == tipo_cartao, Application.status.in_(["APROVADO", "EM_ANALISE"]))
+            if programa_id:
+                anteriores = anteriores.filter(or_(Application.programa_id == programa_id, (Application.programa_id.is_(None) & Application.loja_id.in_(db.query(programa_unidades.c.loja_id).filter(programa_unidades.c.programa_id == programa_id)))))
+            elif loja:
+                anteriores = anteriores.filter(Application.loja_id == loja.id)
+            else:
+                anteriores = anteriores.filter(Application.loja_id.is_(None))
+            if anteriores.first():
+                raise HTTPException(409, "Já existe uma solicitação ativa para este cartão. Use seu código de acompanhamento.")
+
+        codigo = secrets.token_urlsafe(24)
+        nova_solicitacao = Application(
+            usuario_id=usuario.id, tipo_cartao=tipo_cartao,
+            loja_id=loja.id if loja else None,
+            contribuidor_id=contribuidor.id if contribuidor else None,
+            programa_id=programa_id, chave_ativa=chave,
+            codigo_consulta_hash=hashlib.sha256(codigo.encode()).hexdigest(),
+            status=status_solicitacao
         )
-        db.add(usuario)
+        db.add(nova_solicitacao)
         db.flush()
-
-    status_solicitacao = "EM_ANALISE"
-    if colaborador:
-        status_solicitacao = "APROVADO" if tipo_cartao == modalidade_permitida else "REPROVADO"
-
-    nova_solicitacao = Application(
-        usuario_id=usuario.id,
-        tipo_cartao=tipo_cartao,
-        loja_id=loja.id if loja else None,
-        status=status_solicitacao,
-    )
-
-    db.add(nova_solicitacao)
-    db.commit()
-    db.refresh(nova_solicitacao)
-    return nova_solicitacao
+        enviar_alternativas = status_solicitacao == "REPROVADO" and solicitacao.aceita_ofertas
+        if enviar_alternativas:
+            db.add(OfferInterest(solicitacao_id=nova_solicitacao.id, email=str(solicitacao.email)))
+        db.commit()
+        db.refresh(nova_solicitacao)
+        resposta = ApplicationResponse.model_validate(nova_solicitacao).model_dump()
+        resultado = {**resposta, "codigo_consulta": codigo, "situacao_oferta": None}
+        if enviar_alternativas:
+            try:
+                oferta = enviar_oferta(db, nova_solicitacao.id, str(solicitacao.email))
+                resultado["situacao_oferta"] = oferta["situacao"]
+            except SQLAlchemyError:
+                db.rollback()
+                logging.getLogger(__name__).exception("Não foi possível concluir o envio de ofertas.")
+                resultado["situacao_oferta"] = "PENDENTE_ENVIO"
+        return resultado
+    except IntegrityError as erro:
+        db.rollback()
+        raise HTTPException(409, "Cadastro ou solicitação já existente.") from erro
+    except OperationalError as erro:
+        db.rollback()
+        if getattr(erro.orig, "args", [None])[0] in (1205, 1213):
+            raise HTTPException(409, "Solicitação concorrente. Consulte o pedido ou tente novamente.") from erro
+        raise
 
 
 @router.get("/{solicitacao_id}", response_model=ApplicationResponse)
-def buscar_solicitacao(
-    solicitacao_id: int,
-    cpf: str = Query(min_length=11, max_length=14),
-    db: Session = Depends(get_db),
-):
-    cpf_limpo = somente_numeros(cpf)
-    if len(cpf_limpo) != 11:
-        raise HTTPException(status_code=400, detail="Informe um CPF válido.")
-
-    solicitacao = (
-        db.query(Application)
-        .join(User, Application.usuario_id == User.id)
-        .filter(Application.id == solicitacao_id, User.cpf == cpf_limpo)
-        .first()
-    )
-    if not solicitacao:
-        raise HTTPException(status_code=404, detail="Solicitação não encontrada para esse CPF.")
-    return solicitacao
+def buscar_solicitacao(solicitacao_id: int, request: Request, cpf: str = Header(min_length=11, max_length=14, alias="X-CPF"), codigo: str = Header(min_length=20, max_length=120, alias="X-Codigo-Consulta"), db: Session = Depends(get_db)):
+    verificar_limite_consulta(request)
+    pedido = db.query(Application).join(User).filter(Application.id == solicitacao_id, User.cpf == somente_numeros(cpf), Application.codigo_consulta_hash == hashlib.sha256(codigo.encode()).hexdigest()).first()
+    if not pedido:
+        raise HTTPException(404, "Solicitação não encontrada.")
+    return pedido
 
 
 @router.post("/consultar", response_model=ApplicationListResponse)
-def consultar_solicitacoes_por_cpf(
-    consulta: ConsultaCpf,
-    request: Request,
-    pagina: int = Query(default=1, ge=1, le=1000),
-    db: Session = Depends(get_db),
-):
+def consultar_solicitacoes_por_cpf(consulta: ConsultaCpf, request: Request, pagina: int = Query(default=1, ge=1, le=1000), db: Session = Depends(get_db)):
     verificar_limite_consulta(request)
-    cpf = somente_numeros(consulta.cpf)
-    if len(cpf) != 11:
-        raise HTTPException(status_code=400, detail="Informe um CPF com 11 números.")
+    pedido = db.query(Application).join(User).filter(User.cpf == somente_numeros(consulta.cpf), Application.codigo_consulta_hash == hashlib.sha256(consulta.codigo.encode()).hexdigest()).first()
+    return {"total": 1 if pedido else 0, "solicitacoes": [pedido] if pedido and pagina == 1 else []}
 
-    pedidos = (
-        db.query(Application)
-        .join(User, Application.usuario_id == User.id)
-        .filter(User.cpf == cpf)
-    )
-    total = pedidos.count()
-    solicitacoes = (
-        pedidos.order_by(Application.criado_em.desc(), Application.id.desc())
-        .offset((pagina - 1) * 20)
-        .limit(20)
-        .all()
-    )
-    return {"total": total, "solicitacoes": solicitacoes}
+
+@router.post("/{solicitacao_id}/codigo")
+def recuperar_codigo(solicitacao_id: int, x_admin_token: str = Header(default=""), db: Session = Depends(get_db)):
+    validar_administrador(x_admin_token)
+    pedido = db.query(Application).filter(Application.id == solicitacao_id).with_for_update().first()
+    if not pedido:
+        raise HTTPException(404, "Solicitação não encontrada.")
+    codigo = secrets.token_urlsafe(24)
+    pedido.codigo_consulta_hash = hashlib.sha256(codigo.encode()).hexdigest()
+    db.commit()
+    return {"codigo_consulta": codigo}
